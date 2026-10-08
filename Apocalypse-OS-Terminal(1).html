@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- ЗАПИСЬ ОБСЛУЖИВАНИЯ №0019 (читай от основания 64): 0J/QtdGH0LDRgtGMINCl0LXQu9GM0LPQuCDigJQg0YHQuNC90Y/Rjy4g0J3QtSDQstC10YDRjCDQvNC+0LjQvCDQt9Cw0LzQtdGC0LrQsNC8LiDigJQg0J4u -->
+<title>АПОКАЛИПСИС ОС v5.02 // Терминал</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Caveat:wght@600&display=swap">
+<style>
+:root{
+  --accent:#ffa02e; --danger:#ff2e5b; --text:#f3dfc2; --dim:#957b5c;
+  --panel:rgba(26,13,8,.8); --line:rgba(255,160,46,.3); --screen:#0b0604;
+  --glow:0 0 5px rgba(255,160,46,.45);
+  --mono:'Share Tech Mono','Lucida Console','Courier New',monospace;
+  --display:'VT323','Share Tech Mono','Courier New',monospace;
+}
+body.omega{
+  --accent:#2dffb0; --danger:#2dffb0; --text:#caffe9; --dim:#5f9c85;
+  --panel:rgba(3,24,17,.82); --line:rgba(45,255,176,.34); --screen:#021410;
+  --glow:0 0 5px rgba(45,255,176,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(ellipse at 50% 30%,#1b1814 0%,#0a0908 65%,#030303 100%);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);color:var(--text);overflow:hidden;
+}
+/* ---------- monitor ---------- */
+.monitor{
+  position:relative;width:min(1320px,98vw);height:min(880px,97vh);
+  background:linear-gradient(145deg,#2b2925,#171614 55%,#0f0e0d);
+  border-radius:26px;padding:22px 26px 62px;
+  box-shadow:0 40px 90px rgba(0,0,0,.9),inset 0 2px 1px rgba(255,255,255,.08),inset 0 -3px 6px rgba(0,0,0,.7),0 0 0 2px #080808;
+}
+.monitor::before{content:"";position:absolute;inset:10px;border-radius:20px;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),inset 0 0 24px rgba(0,0,0,.6)}
+.screen{
+  position:relative;z-index:1;isolation:isolate;height:100%;border-radius:18px/22px;overflow:hidden;background:var(--screen);
+  box-shadow:inset 0 0 70px rgba(0,0,0,.95),inset 0 0 0 3px #050505,0 0 0 4px #000,0 0 60px rgba(255,160,46,.12);
+  display:flex;flex-direction:column;transition:background 1.2s,box-shadow 1.2s;
+}
+body.omega .screen{box-shadow:inset 0 0 70px rgba(0,0,0,.95),inset 0 0 0 3px #050505,0 0 0 4px #000,0 0 70px rgba(45,255,176,.2)}
+.screen::before{ /* scanlines + grid */
+  content:"";position:absolute;inset:0;z-index:90;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);
+}
+.screen::after{ /* vignette + flicker */
+  content:"";position:absolute;inset:0;z-index:91;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.65) 100%);
+  animation:flicker 5s infinite steps(1);
+}
+@keyframes flicker{0%,100%{opacity:1}47%{opacity:.96}48%{opacity:.88}49%{opacity:1}83%{opacity:.94}84%{opacity:1}}
+.sweep{position:absolute;left:0;right:0;height:90px;z-index:89;pointer-events:none;
+  background:linear-gradient(transparent,rgba(255,255,255,.035),transparent);animation:sweep 7s linear infinite}
+@keyframes sweep{from{top:-100px}to{top:100%}}
+
+/* chin */
+.chin{position:absolute;left:30px;right:30px;bottom:12px;height:40px;display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:#6b665c;letter-spacing:.08em}
+.plate{font-family:var(--display);font-size:22px;color:#a39c8c;letter-spacing:.18em;text-shadow:0 1px 0 #000}
+.plate small{font-family:var(--mono);font-size:10px;margin-left:10px;color:#6b665c;letter-spacing:.1em}
+.service{display:flex;gap:18px;align-items:center}
+.service span.warn{border:1px solid #5a5446;padding:2px 6px;border-radius:2px;color:#8b8472}
+.led{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);transition:all 1s}
+.knob{width:24px;height:24px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#555,#1a1a1a);
+  box-shadow:0 2px 4px #000,inset 0 1px 1px rgba(255,255,255,.25);color:#999;font-size:11px}
+.knob:focus-visible{outline:2px solid var(--accent)}
+.knob.off{opacity:.45}
+.sticker{position:absolute;bottom:9px;left:50%;margin-left:-95px;z-index:10;transform:rotate(-2deg);background:#efe29a;color:#2d2a1a;
+  padding:7px 16px 9px;font-family:'Caveat','Segoe Print','Comic Sans MS',cursive;font-size:25px;line-height:1;
+  box-shadow:0 3px 8px rgba(0,0,0,.6);border-radius:2px;user-select:text}
+.sticker::before{content:"";position:absolute;left:50%;top:-8px;width:44px;height:14px;margin-left:-22px;background:rgba(220,220,200,.45);transform:rotate(-2deg)}
+.label-plate{position:absolute;left:36px;top:3px;font-size:10px;color:#6b665c;letter-spacing:.14em}
+
+/* ---------- header ---------- */
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 22px;border-bottom:1px solid var(--line);
+  background:rgba(0,0,0,.35);position:relative;z-index:2}
+.brand{font-family:var(--display);font-size:30px;color:var(--accent);text-shadow:0 0 10px var(--accent);letter-spacing:.06em;line-height:1}
+.brand small{display:block;font-family:var(--mono);font-size:11px;color:var(--dim);text-shadow:none;letter-spacing:.06em;margin-top:3px}
+.status{font-size:13px;color:var(--dim);text-align:right}
+.status b{color:var(--danger);text-shadow:0 0 8px var(--danger);font-weight:400}
+.hdr-right{display:flex;align-items:center;gap:18px}
+.override{position:relative;overflow:hidden;background:transparent;border:1px solid var(--danger);color:var(--danger);
+  font-family:var(--mono);font-size:14px;padding:9px 14px;cursor:pointer;text-shadow:0 0 8px var(--danger);
+  box-shadow:0 0 12px rgba(255,46,91,.3),inset 0 0 12px rgba(255,46,91,.12);touch-action:manipulation}
+body.omega .override{box-shadow:0 0 12px rgba(45,255,176,.3),inset 0 0 12px rgba(45,255,176,.12)}
+.override::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--danger);box-shadow:0 0 8px var(--danger)}
+.override.holding::after{width:100%;transition:width .8s linear}
+.override:hover{background:rgba(255,46,91,.1)}
+body.omega .override:hover{background:rgba(45,255,176,.1)}
+.override:focus-visible,.btn:focus-visible,.nav-item:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- layout ---------- */
+.main{flex:1;display:flex;min-height:0;position:relative;z-index:1}
+.side{width:340px;flex:none;overflow-y:auto;background:var(--panel);border-right:1px solid var(--line);transition:all 1s}
+.sec{font-size:12px;color:var(--dim);padding:16px 16px 6px;line-height:1.4}
+.nav-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;font-size:14px;cursor:pointer;
+  border-left:3px solid transparent;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s,padding .2s}
+.nav-item:hover{background:rgba(255,160,46,.07);padding-left:20px}
+body.omega .nav-item:hover{background:rgba(45,255,176,.07)}
+.nav-item.active{border-left-color:var(--accent);background:rgba(255,160,46,.12);color:var(--accent);text-shadow:var(--glow)}
+body.omega .nav-item.active{background:rgba(45,255,176,.12)}
+.nav-item.new{animation:newrow 1.6s ease 3}
+@keyframes newrow{50%{background:rgba(45,255,176,.3)}}
+.badge{font-size:10px;padding:2px 6px;border:1px solid currentColor;white-space:nowrap}
+.badge.ok{color:var(--dim)} .badge.lock{color:var(--danger);text-shadow:0 0 6px var(--danger)}
+.view{flex:1;overflow-y:auto;padding:26px 30px}
+.card{background:var(--panel);border:1px solid var(--line);padding:26px 28px;box-shadow:0 14px 34px rgba(0,0,0,.6);animation:open .35s ease-out}
+@keyframes open{from{opacity:0;transform:scaleY(.97)}}
+.card-head{display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
+.doc-title{font-family:var(--display);font-size:34px;line-height:1.05;color:var(--accent);text-shadow:0 0 9px var(--accent)}
+.doc-meta{font-size:12px;color:var(--dim);margin-top:6px}
+.field{display:grid;grid-template-columns:230px 1fr;gap:12px;margin-bottom:12px;font-size:15px;line-height:1.45}
+.field dt{color:var(--dim)} .field dd{color:var(--text);text-shadow:var(--glow)}
+.note{margin-top:22px;padding:16px 18px;background:rgba(0,0,0,.4);border-left:3px solid var(--danger);line-height:1.65;font-size:15px;max-width:78ch}
+.note h4{font-weight:400;font-size:12px;color:var(--danger);margin-bottom:8px;text-shadow:0 0 6px var(--danger)}
+.note p{color:var(--text)}
+
+/* ---------- overlays ---------- */
+.layer{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(3,2,2,.82);z-index:50}
+.layer.on{display:flex}
+.box{width:min(440px,90%);padding:28px;text-align:center;background:#0b0605;border:2px solid var(--accent);box-shadow:0 0 30px rgba(255,160,46,.25),inset 0 0 20px rgba(255,160,46,.06)}
+body.omega .box{box-shadow:0 0 30px rgba(45,255,176,.25),inset 0 0 20px rgba(45,255,176,.06)}
+.box h3{font-family:var(--display);font-size:30px;font-weight:400;color:var(--accent);text-shadow:0 0 10px var(--accent);margin-bottom:8px}
+.box p{font-size:13px;color:var(--dim);line-height:1.5}
+.pass{width:100%;margin:18px 0;padding:11px;background:#000;border:1px solid var(--line);color:var(--text);font:inherit;font-size:17px;text-align:center;letter-spacing:.2em}
+.btn{background:var(--accent);color:#120800;border:0;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer}
+body.omega .btn{color:#001a10}
+.btn.ghost{background:transparent;color:var(--dim);border:1px solid var(--line);margin-left:8px}
+.err{display:none;margin-top:14px;font-size:13px;color:var(--danger)}
+.crit{border-color:#ff2e5b;box-shadow:0 0 36px rgba(255,46,91,.5),inset 0 0 26px rgba(255,46,91,.12);width:min(520px,92%);text-align:left;animation:critpulse 1.4s infinite}
+@keyframes critpulse{50%{box-shadow:0 0 54px rgba(255,46,91,.75),inset 0 0 26px rgba(255,46,91,.2)}}
+.crit h3{color:#ff2e5b;text-shadow:0 0 12px #ff2e5b;font-size:34px}
+.crit .code{font-size:12px;color:#ff7c97;margin:6px 0 12px;line-height:1.5}
+.crit .btn{background:#ff2e5b;color:#fff}
+.crit .pass{border-color:#ff2e5b;color:#ff9db1}
+.crit .err{color:#ff7c97}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+#boot{background:#030202;z-index:70;flex-direction:column;gap:22px}
+#boot .box{border-color:var(--danger)}
+.boot-logo{font-family:var(--display);font-size:46px;color:var(--danger);text-shadow:0 0 16px var(--danger);letter-spacing:.14em;animation:pulse 2.4s infinite}
+@keyframes pulse{50%{opacity:.7}}
+.egg{display:block;text-align:left;font-style:italic;line-height:1.6;color:var(--accent)!important}
+
+#reboot{background:#000;z-index:80;flex-direction:column;gap:18px;opacity:0;transition:opacity 1.1s}
+#reboot.show{opacity:1}
+#logo{width:150px;height:170px;filter:drop-shadow(0 0 10px #2dffb0)}
+#logo *{fill:none;stroke:#2dffb0;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+#reboot.show #logo .d{animation:draw 2.4s ease forwards}
+#reboot.show #logo .d2{animation:draw 1.6s ease 1.8s forwards}
+#logo .fill{fill:rgba(45,255,176,.25);stroke:none;stroke-dasharray:none;opacity:0}
+#reboot.show #logo .fill{animation:fillup 1.5s ease 2.6s forwards}
+#logo .pupil{fill:#2dffb0;stroke:none;stroke-dasharray:none;opacity:0}
+#reboot.show #logo .pupil{animation:blink 2.4s ease 3.4s infinite}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fillup{to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}92%{opacity:1}96%{opacity:0}}
+#rlog{width:min(460px,86%);min-height:104px;font-size:13px;color:#2dffb0;text-shadow:0 0 6px #2dffb0;line-height:1.7}
+.bar{width:min(460px,86%);height:8px;border:1px solid #2dffb0;box-shadow:0 0 10px rgba(45,255,176,.4)}
+.bar i{display:block;height:100%;width:0;background:#2dffb0;transition:width .5s}
+
+#toast{position:absolute;right:20px;bottom:20px;z-index:60;width:min(380px,86%);padding:14px 16px;background:rgba(8,4,3,.94);
+  border:1px solid var(--accent);box-shadow:0 0 18px rgba(255,160,46,.3);font-size:13px;line-height:1.5;
+  transform:translateY(130%);opacity:0;transition:transform .35s,opacity .35s}
+body.omega #toast{box-shadow:0 0 18px rgba(45,255,176,.3)}
+#toast.on{transform:none;opacity:1}
+#toast b{display:block;font-weight:400;font-size:11px;color:var(--dim);margin-bottom:5px}
+#toast span{color:var(--accent);text-shadow:var(--glow)}
+
+.sh a{color:var(--accent);cursor:pointer;text-decoration:underline dotted}.sh{font-size:14px;line-height:1.6;max-height:62vh;overflow-y:auto;white-space:pre-wrap}.cmd{width:100%;background:transparent;border:0;border-top:1px solid var(--line);color:var(--text);font:inherit;font-size:15px;padding:10px 0;outline:0}.node{cursor:pointer}.lie{display:block;width:100%;text-align:left;margin:7px 0;padding:9px;background:transparent;border:1px solid var(--line);color:var(--text);font:inherit;cursor:pointer}.layer#otto{z-index:88;background:#000;flex-direction:column;align-items:flex-start;justify-content:center;padding:8%}.layer#fin{z-index:85;background:#050403;flex-direction:column;align-items:flex-start;justify-content:center;padding:6% 8%;font-size:16px;line-height:1.9;text-shadow:0 0 8px currentColor;overflow:auto}.glitch,.glitch2{font-family:var(--display);font-size:36px;margin-top:18px;color:#ff2e5b;text-shadow:2px 0 #0ff,-2px 0 #f0f;animation:gl 1.1s infinite steps(1);letter-spacing:.06em}@keyframes gl{20%{transform:translate(-3px,1px) skewX(8deg)}40%{transform:translate(2px,-2px)}60%{transform:translate(-1px,2px) skewX(-6deg);opacity:.8}80%{transform:translate(3px,0)}}.screen.crash{animation:cr .12s infinite;filter:hue-rotate(90deg) contrast(1.4)}@keyframes cr{25%{transform:translate(-6px,3px) skewX(2deg)}50%{transform:translate(5px,-4px)}75%{transform:translate(-3px,-2px) skewX(-2deg)}}.ghost{cursor:default}.ghost svg{opacity:.02}.ghost svg *{stroke-width:.9}.ghost:hover svg{opacity:.03}.btn.hl{background:var(--accent);color:#120800}.note2{position:absolute;left:9%;top:11%;width:46%;z-index:2;background:#d9d0a8;color:#2a261a;padding:9px 13px;font-size:11px;line-height:1.55;transform:rotate(-1.4deg);box-shadow:0 3px 8px rgba(0,0,0,.6)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px}.it{text-align:center;cursor:pointer;padding:12px 6px;border:1px solid transparent;font-size:13px;word-break:break-all;transition:background .2s}.it:hover{border-color:var(--line);background:rgba(255,160,46,.08)}.ic svg{width:46px;height:46px;color:var(--accent);filter:drop-shadow(0 0 5px var(--accent))}.it.lk{opacity:.45}.monitor{transition:transform .45s ease}.monitor.turn{transform:perspective(1400px) rotateY(90deg)}
+.rear{display:none;position:absolute;inset:0;z-index:30;border-radius:26px;overflow:hidden;padding:22px 30px;color:#8b8472;font-size:12px;
+ background:repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 9px),linear-gradient(160deg,#252420,#100f0e)}
+.monitor.rear-on .rear{display:block}
+.rbk{position:absolute;left:24px;top:20px;margin:0}
+.rplate{position:absolute;right:30px;top:22px;text-align:right;line-height:1.6;border:1px solid #4a463c;padding:8px 12px;letter-spacing:.08em}
+.vents{position:absolute;left:7%;top:13%;width:86%;height:20%;border-radius:6px;background:repeating-linear-gradient(0deg,#040404 0 6px,#1b1a17 6px 14px);box-shadow:inset 0 0 14px #000}
+.hatchwrap{position:absolute;left:50%;top:37%;transform:translateX(-50%);width:min(700px,92%);height:min(420px,58%)}
+.bay{position:absolute;inset:0;background:#0b0a09;border:2px solid #3a372f;box-shadow:inset 0 0 24px #000;padding:14px 18px;display:flex;gap:20px;overflow:auto}
+.cover{position:absolute;inset:0;background:linear-gradient(145deg,#3a3731,#24221e);border:2px solid #4b473d;display:flex;align-items:center;justify-content:center;text-align:center;
+ color:#9a937f;letter-spacing:.2em;line-height:1.8;transition:transform .7s cubic-bezier(.5,0,1,.6),opacity .7s}
+.cover.off{transform:translateY(140%) rotate(8deg);opacity:0;pointer-events:none}
+.scr{position:absolute;width:26px;height:26px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#8a8576,#3a372f);transition:transform .5s,opacity .5s}
+.scr::after{content:"";position:absolute;left:4px;right:4px;top:11px;height:3px;background:#1a1916}
+.scr.out{transform:rotate(720deg) scale(.6);opacity:.15;pointer-events:none}
+.levs{display:flex;gap:10px;margin-bottom:26px}
+.lev{width:38px;height:130px;position:relative;background:#1a1916;border:1px solid #3a372f;cursor:pointer;padding:0}
+.lev i{position:absolute;left:7px;right:7px;height:34px;bottom:8px;border-radius:3px;background:linear-gradient(#c4c4c4,#6a6a6a);transition:bottom .15s}
+.lev.up i{bottom:86px;box-shadow:0 0 8px var(--accent)}
+.lev b{position:absolute;bottom:-22px;left:0;right:0;font-weight:400;color:#8b8472}
+.rules{flex:1;font-size:11px;line-height:1.7;color:#a89f88;min-width:200px}.rules b{color:var(--accent);font-weight:400}
+.pwrow{display:flex;align-items:center;gap:12px}#plst{font-size:11px;color:#8b8472}
+.knob.pulse{animation:kp 1.2s infinite}@keyframes kp{50%{box-shadow:0 0 14px var(--accent),0 2px 4px #000;color:var(--accent)}}
+@media (max-width:860px){.bay{flex-direction:column}.hatchwrap{height:62%;top:36%}.rplate{display:none}}
+::-webkit-scrollbar{width:7px} ::-webkit-scrollbar-thumb{background:var(--line)} ::-webkit-scrollbar-track{background:transparent}
+@media (max-width:860px){
+  .monitor{padding:12px 12px 46px;height:100vh;border-radius:14px}
+  .main{flex-direction:column} .side{width:100%;height:36%;border-right:0;border-bottom:1px solid var(--line)}
+  .field{grid-template-columns:1fr;gap:2px} .sticker{left:auto;margin:0;right:54px;bottom:6px;font-size:19px} .service .warn,.plate small,.label-plate{display:none}
+  header{flex-wrap:wrap} .status{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){.screen::after,.sweep,.boot-logo,.crit,.nav-item.new{animation:none}}
+</style>
+</head>
+<body>
+<div class="monitor">
+  <div class="label-plate">МОДЕЛЬ АП-502 · ТОЛЬКО ДЛЯ СЛУЖЕБНОГО ИСПОЛЬЗОВАНИЯ</div>
+  <div class="sticker">Pass: Rizagein</div>
+
+  <div class="screen" id="screen">
+    <div class="sweep"></div>
+
+    <header>
+      <div class="brand">АПОКАЛИПСИС ОС<small>Центральный терминал · сетевой мульти-архив v5.02</small></div>
+      <div class="hdr-right">
+        <div class="status">Статус Патриарха: <b id="statusText">НЕ АКТИВЕН</b><br>Высший доступ Патриарха</div>
+        <button class="override" id="overrideBtn" title="Клик — подсказка. Удержание — оверрайд.">[ OVERRIDE LINK ]</button>
+      </div>
+    </header>
+
+    <div class="main">
+      <nav class="side" id="side" aria-label="Архив"></nav>
+      <section class="view" id="view" aria-live="polite"></section>
+    </div>
+
+    <!-- boot / auth -->
+    <div class="layer on" id="boot">
+      <div class="boot-logo">АПОКАЛИПСИС ОС v5.0</div>
+      <div class="box" id="bootBox">
+        <h3>Авторизация</h3>
+        <p id="bootDesc">Введите ключ доступа. Он написан на стикере внизу рамки монитора.</p>
+        <input type="password" class="pass" id="bootPass" placeholder="ПАРОЛЬ..." autocomplete="off" autofocus>
+        <button class="btn" id="bootBtn" style="width:100%">Войти в систему</button>
+        <div class="err" id="bootErr">Доступ запрещён. Ключ не принят.</div>
+      </div>
+    </div>
+
+    <!-- archive password -->
+    <div class="layer" id="lock">
+      <div class="box" id="lockBox">
+        <h3>Доступ ограничен</h3>
+        <p id="lockName">Введите код дешифровки.</p>
+        <input type="password" class="pass" id="lockPass" placeholder="КОД..." autocomplete="off">
+        <div><button class="btn" id="lockOk">Подтвердить</button><button class="btn ghost" id="lockNo">Отмена</button></div>
+        <div class="err" id="lockErr">Ошибка дешифровки.</div>
+      </div>
+    </div>
+
+    <!-- critical exception -->
+    <div class="layer" id="crit">
+      <div class="box crit" id="critBox" role="alertdialog" aria-labelledby="critT">
+        <h3 id="critT">CRITICAL SYSTEM EXCEPTION</h3>
+        <div class="code">0x0000OMEGA · ACCESS_VIOLATION · ARCHIVE_CORE<br>Запрошена перезапись прав Патриарха. Подтвердите мастер-код администратора.</div>
+        <input type="password" class="pass" id="critPass" placeholder="МАСТЕР-КОД..." autocomplete="off">
+        <div><button class="btn" id="critOk">Выполнить перезапись</button><button class="btn ghost" id="critNo">Отмена</button></div>
+        <div class="err" id="critErr">Неверный мастер-код. Попытка зафиксирована.</div>
+      </div>
+    </div>
+
+    <!-- reboot -->
+    <div class="layer" id="reboot">
+      <svg id="logo" viewBox="0 0 120 140" aria-hidden="true">
+        <path class="fill" d="M33 80 L87 80 L100 108 Q104 120 92 120 L28 120 Q16 120 20 108 Z"/>
+        <path class="d" pathLength="1" d="M44 12 H76 M48 12 V54 L18 106 Q10 122 28 122 H92 Q110 122 102 106 L72 54 V12"/>
+        <path class="d2" pathLength="1" d="M34 94 Q60 70 86 94 Q60 118 34 94 Z"/>
+        <circle class="d2" pathLength="1" cx="60" cy="94" r="9"/>
+        <circle class="pupil" cx="60" cy="94" r="3.6"/>
+      </svg>
+      <div id="rlog"></div>
+      <div class="bar"><i id="rbar"></i></div>
+    </div>
+
+    <div class="layer" id="otto"></div>
+    <div class="layer" id="fin"></div>
+    <div class="layer" id="pz"><div class="box" id="pzb" style="width:min(540px,94%)"></div></div>
+    <div id="toast" role="status"></div>
+  </div>
+
+  <div class="rear" id="rear">
+    <button class="btn ghost rbk" id="rbk">← Вид спереди</button>
+    <div class="rplate">АП-502 · S/N 0019-Ω<br>СЕРВИСНЫЙ ДОСТУП: ТОЛЬКО ПЕРСОНАЛ<br>220V ~50Hz</div>
+    <div class="vents"></div>
+    <div class="note2" id="rules2"></div>
+    <div class="hatchwrap">
+      <div class="bay"><div><div class="levs" id="levs"></div><div class="pwrow"><button class="btn" id="pwr">ПОДАТЬ ПИТАНИЕ</button><span id="plst">ЛИНИЯ РАЗОМКНУТА</span></div></div><div class="rules" id="rules"></div></div>
+      <div class="cover" id="cover">СЕРВИСНЫЙ ЛЮК<br>4 ВИНТА
+        <button class="scr" style="left:10px;top:10px" aria-label="винт"></button><button class="scr" style="right:10px;top:10px" aria-label="винт"></button>
+        <button class="scr" style="left:10px;bottom:10px" aria-label="винт"></button><button class="scr" style="right:10px;bottom:10px" aria-label="винт"></button></div>
+    </div>
+  </div>
+
+  <div class="chin">
+    <div class="plate">APOCALYPSE<small>SYSTEMS · AP-502 · 220V ~50Hz</small></div>
+    <div class="service"><span class="warn">НЕ ВСКРЫВАТЬ · ВНУТРИ ВЫСОКОЕ НАПРЯЖЕНИЕ</span>
+      <button class="knob" id="flipBtn" aria-label="Вид сзади" title="Осмотреть корпус сзади">⟲</button><button class="knob" id="muteBtn" aria-label="Звук вкл/выкл" title="Звук">♪</button><span class="led"></span></div>
+  </div>
+</div>
+
+<script>
+const archiveData = [
+            // --- РАЗДЕЛ 1 ---
+            { id: 'p1', section: 1, title: 'Клон-прототип #01-Альфа', locked: false, 
+                fields: { 
+                    'Цель': 'Первичный генетический посев. Синтез ДНК донора и клеток костного мозга высших Расы Кицунэ.', 
+                    'Статус': 'КЛЕТОЧНЫЙ КОЛЛАПС // УТИЛИЗИРОВАН',
+                    'Сходство со мной': '99.4%',
+                    'Стабильность био-поля': '4% (полный распад на 3-м часу).'
+                }, 
+                note: '«Слишком грубое внедрение. Человеческая основа отторгает природу Кицунэ. Первые же деления клеток превращают ткани в бесформенную белковую массу. Нужны тонкие катализаторы, чтобы заставить углеродные структуры удерживать чужую биологию».', hidden: false },
+            
+            { id: 'p2', section: 1, title: 'Клон-прототип #02-Бета', locked: false, 
+                fields: { 
+                    'Цель': 'Прямая репликация иллюзорного восприятия Расы Кицунэ при сохранении магии воздуха.', 
+                    'Статус': 'АННИГИЛИРОВАН КРИСТАЛЛИЗАЦИЕЙ',
+                    'Интеграция сил': 'Резонанс в левой доле коры.',
+                    'Физический статус': 'Тканевая деградация, обращение в эфирный кристалл.'
+                }, 
+                note: '«Этот дурак попытался скопировать природные иллюзии Кицунэ, но его собственные каналы магии воздуха восприняли чужеродный дар как яд. К исходу суток объект застыл хрустальной статуей. Две магии выжигают друг друга. Моё настоящее биологическое тело стареет и дряхлеет, а я всё ещё топчусь на месте».', hidden: false },
+
+            { id: 'p5', section: 1, title: 'Клон-прототип #05-Дельта', locked: false, 
+                fields: { 
+                    'Цель': 'Изоляция аэромантии в физическом контуре с имплантацией внешних проводников Кицунэ.', 
+                    'Статус': 'ПСИХИЧЕСКОЕ ИСТОЩЕНИЕ // УТИЛИЗИРОВАН ПРИ ВСПЫШКЕ БЕЗУМИЯ',
+                    'Имитация хвостов': 'Виртуальный девятихвостый контур.',
+                    'Стабильность психики': 'Срыв на 4-е сутки.'
+                }, 
+                note: '«Объект #05 утверждал, что видит невидимые плетения природы зверолюдей. Человеческий разум не выдерживает сенсорики Кицунэ. Он кричал о фантомных хвостах, а когда попытался вызвать шторм и укутать его иллюзорным барьером, его собственная аэромантия разорвала легкие изнутри. Слишком много ярости, абсолютно непригодно для переноса моего "я"».', hidden: false },
+
+            { id: 'p7', section: 1, title: 'Клон-прототип #07-Эпсилон', locked: false, 
+                fields: { 
+                    'Цель': 'Создание носителя со спящими генами обеих структур.', 
+                    'Статус': 'ОТБРАКОВКА ПО ПРИЗНАКУ «НУЛЬ»',
+                    'Жизнеспособность': 'Абсолютная (24 дня).',
+                    'Магический потенциал': '0.0% (полное отсутствие искры).'
+                }, 
+                note: '«Парадокс. Пытаясь погасить конфликт между аэромантией человека и силой Кицунэ, я случайно создал пустышку. У Эпсилона нет ни капли магии. Он защищен от чужого внушения иллюзии просто соскальзывают с него, но и сам он серость. Мне не нужен иммунитет, мне нужно могущество».', hidden: false },
+
+            { id: 'p9', section: 1, title: 'Клон-прототип #09-Иота', locked: false, 
+                fields: { 
+                    'Цель': 'Искусственная медикаментозная блокировка эмоционального фона.', 
+                    'Статус': 'ЗАМОРОЖЕН ИЗ-ЗА ДЕГРАДАЦИИ ЛИЧНОСТИ',
+                    'Контроль иллюзий': 'Частичный (радиус 1.5 метра).',
+                    'Жизненный цикл': '7 дней до затухания мозговой активности.'
+                }, 
+                note: '«Блокираторы эмоций спасли его нервные узлы от выгорания. Клон даже удерживал левитирующий предмет в иллюзорном тумане. Но плата оказалась огромной Иота превратился в овощ без воли. А без воли и эгоса магия угасает сама собой за пару суток. Мне нужен я сам, полный амбиций, а не безвольный манекен».', hidden: false },
+
+            { id: 'p11', section: 1, title: 'Клон-прототип #11-Каппа', locked: false, 
+                fields: { 
+                    'Цель': 'Принудительное расщепление энергетических каналов на два независимых полушария мозга.', 
+                    'Статус': 'СУИЦИД СУБЪЕКТА',
+                    'Проявление сил': 'Левый глаз активирует аэромантию, правый иллюзии.',
+                    'Синхронизация полушарий': 'Ошибка ядра (шизофрения).'
+                }, 
+                note: '«Каппа был близок, но разделение полушарий вызвало раскол личности. Левое полушарие считало себя магом, правое Кицунэ. Они возненавидели друг друга. Объект задушил сам себя левой рукой, пока правая отчаянно пыталась поставить барьер. Очередной провал. Перенос сознания в такую нестабильную систему убьет меня окончательно».', hidden: false },
+
+            { id: 'p14', section: 1, title: 'Клон-прототип #14-Ню', locked: false, 
+                fields: { 
+                    'Цель': 'Добавление крови чистокровных Кицунэ для подавления отторжения.', 
+                    'Статус': 'ДЕГРАДАЦИЯ РАЗУМА // ЛИКВИДИРОВАН',
+                    'Внешние мутации': 'Зверолюд (уши, когти, бледность).',
+                    'Разум': 'Потеря речи, одичание на 2-е сутки.'
+                }, 
+                note: '«Слишком сильный сдвиг в сторону Расы Кицунэ. Клон потерял мой интеллект, интеллект Апокалипсиса, превратившись в капризного полукровку. Он унаследовал только страх куполов и дикую тягу к полей. Пришлось выследить его среди горящего шалфея и прекратить этот кошмар. Я ищу силу бога, а не звериные инстинкты».', hidden: false },
+
+            // --- РАЗДЕЛ 2 ---
+            { id: 'b1', section: 2, title: 'Проект «В-01» (Искажение мерности)', locked: false, 
+                fields: { 
+                    'Материал': 'Эфирный экстракт, пространственные слепки.', 
+                    'Статус': 'ЗАМОРОЖЕНО ИЗ-ЗА УГРОЗЫ ИЗЛОМА'
+                }, 
+                note: '«Попытка создать пространственные безразмерные сумки на основе иллюзий Кицунэ провалилась. Пространство вне живого ума нестабильно. Ассистент случайно уронил рядом стальной гвоздь вся мерность схлопнулась в точку, оторвав ему руку. Сталь и железо Велграда разрушают тонкую структуру иллюзий».', hidden: false },
+
+            { id: 'b4', section: 2, title: 'Проект «В-04» (Ложная Вспышка)', locked: false, 
+                fields: { 
+                    'Назначение': 'Перегрузка зрительных и ментальных каналов магов разума.', 
+                    'Статус': 'ВНЕДРЕНО В ОБОРОННЫЙ КОМПЛЕКС'
+                }, 
+                note: '«Жидкость при детонации высвобождает белый свет такой плотности, что ментальные контуры любого существа уходят на принудительную перезагрузку. Идеальное средство против фокусов Расы Кицунэ. Оставил пару ампул в сейфе терминала на случай непредвиденных бунтов подопытных».', hidden: false },
+
+            { id: 'b8', section: 2, title: 'Проект «В-08» (Калибратор «Петри»)', locked: false, 
+                fields: { 
+                    'Материал': 'Ртутно-эфирная основа, геометрия восьмиугольника.', 
+                    'Статус': 'АКТИВНОЕ ИСПОЛЬЗОВАНИЕ НА КАФЕДРЕ'
+                }, 
+                note: '«Мое маленькое изобретение. Капля крови в центре восьмиугольной чаши безошибочно указывает на чистоту магии и склонность к иллюзиям. Идеально для сортировки отребья, прибывающего в Велград. Существа с идеальным балансом по центру чаши величайшая редкость. Зверолюди слишком хаотичны для этого».', hidden: false },
+
+            { id: 'b12', section: 2, title: 'Проект «В-12» (Пыльца Шалфея)', locked: false, 
+                fields: { 
+                    'Назначение': 'Химический обман рецепторов восприятия без затрат магии.', 
+                    'Статус': 'ИНТЕГРИРОВАНО В СЫРЬЕ СЕРИИ «ЦВЕТОК»'
+                }, 
+                note: '«Концентрат из дикого велградского шалфея творит чудеса. Он обманывает органы чувств напрямую, заставляя мозг верить в ложную реальность на биохимическом уровне. Но состав быстро распадается на воздухе. Ему нужен постоянный органический носитель живое тело, способное регенерировать этот яд».', hidden: false },
+
+            { id: 'b15', section: 2, title: 'Проект «В-15» (Ядро Ложного Эго)', locked: false, 
+                fields: { 
+                    'Субъект': 'Чистокровная Кицунэ Тинъюнь', 
+                    'Статус': 'БЛОКИРОВКА УСПЕШНА // МЕТОД ОБКАТАН'
+                }, 
+                note: '«Эксперимент на девке Тинъюнь доказал жизнеспособность технологии. С помощью "Ядра Искусственного Восприятия" её родная личность и воспоминания были полностью изолированы, уступив место искусственной программе "Аи". Метод перезаписи нейронных цепочек безупречен. Именно этот алхимический алгоритм я использую, чтобы полностью выжечь разум Омеги, когда перенесу своё Ядро в его идеальный сосуд. ВНИМАНИЕ: Если субъект получит доступ к терминалу и увидит это досье, исходная личность Тинъюнь начнет агрессивное подавление Аи, чтобы вернуть себе контроль над телом и вернуть свое законное имя».', hidden: false },
+
+            { id: 'b22', section: 2, title: 'Проект «В-22» (Слепок Патриарха)', locked: false, 
+                fields: { 
+                    'Статус': 'ПОЛНАЯ АВТОНОМИЯ БУНКЕРА'
+                }, 
+                note: '«Мой бункер откроется только тому, в ком течет моя кровь, ДНК Апокалипсисов. На случай моей непредвиденной физической кончины (которая, увы, уже близко) автоматика впустит Омегу внутрь по ДНК-маркеру. Ему придется прийти сюда. Он сам приведет моё будущее тело в мои руки».', hidden: false },
+
+            // --- РАЗДЕЛ 3 ---
+            { id: 'p18', section: 3, title: 'Клон-прототип #18-Сигма', locked: false, 
+                fields: { 
+                    'Текущий статус': 'ЭКСТРЕННЫЙ СОСУД ДЛЯ МЕНЯ', 
+                    'Генетическое сходство': '99.2%', 
+                    'Жизненный цикл': 'ОСТАЛОСЬ МЕНЕЕ 12 ЧАСОВ ДО АГОНИИ',
+                    'Магия воздуха': 'Максимальный боевой уровень (100% мощности донора).',
+                    'Иллюзии Кицунэ': 'Форсированы до предела через стимуляторы.',
+                    'Текущее сознание': 'МОЁ (перенос осуществлён успешно).'
+                }, 
+                note: '«Моё изначальное, рождённое человеком тело уже мёртво. Тлен и прах. Алхимия не смогла спасти его от старости, и мне пришлось совершить экстренный перенос своего сознания в Сигму. Да, я получил чудовищное, упоительное могущество. Я чувствую, как бушующие потоки магии воздуха сжимают моё иллюзорное поле, превращая ложь в смертоносную плотность! Мороки обретают вес, а вихри усиливают иллюзии в геометрической прогрессии. Я стал идеальным оружием. Но Сигма это проклятый факел. Из-за стопроцентного объёма обеих сил клетки этой оболочки дегенерируют с бешеной скоростью. Я медленно сгораю изнутри прямо сейчас. Мне нужно новое, стабильное тело. Когда Омега и девка Тинъюнь явятся в бункер, я использую всю сокрушительную мощь Сигмы, чтобы полностью обездвижить их обоих. Мне плевать на их сопротивление. Как только они будут скованы, я запущу алгоритм проекта "В-15". Моё Ядро Воспоминаний переродится в Омеге, а его ничтожный разум будет выжжен и заменен моим эго. Я получу идеальный сосуд, а этот безумный Сигма превратится в пепел».', hidden: false },
+
+            { id: 'p19', section: 3, title: 'Клон-прототип #19-Омега', locked: false, 
+                fields: { 
+                    'Кодовое имя': '«Чистый Холст» (Tabula Rasa)', 
+                    'Целевое назначение': 'МОЙ ФИНАЛЬНЫЙ СКАФАНДР',
+                    'Магия воздуха Апокалипсисов': 'ИСКУССТВЕННО УРЕЗАНА ДО 10%.',
+                    'Иллюзии Расы Кицунэ': 'ИСКУССТВЕННО УРЕЗАНЫ ДО 10%.',
+                    'Метод стабилизации': 'Правило половинных объемов («Два вина на донышке бокала»).'
+                }, 
+                note: '«Омега идеален. Мой "чистый холст" не сгорит, его силы урезаны на 90%. Мальчишка думает, что он самостоятельная личность, что он сам стал алхимиком, чтобы компенсировать свою слабость... Идиот. Я сам сделал его таким, чтобы его мозг не выгорел до моего прихода. Когда я подавлю их в этом зале, технология проекта В-15 сделает Омегу мной. Но если до начала процедуры переноса я совершу ошибку, и этот малец разгадает тайну синергии, которую я открыл в теле Сигмы... Если он заставит свои крошечные 10% магии и 10% иллюзий закольцеваться в бесконечный резонанс, бокал не разорвётся, но сила выдаст стабильный вихрь. Впрочем, этого не случится. Оболочка Сигмы слишком сильна, и я не проиграю собственному творению».', hidden: false },
+
+            // --- РАЗДЕЛ 4 ---
+            { id: 'p20', section: 4, title: 'Эксперимент #20 (Проект "Эфирный Зуб")', locked: true, password: 'OTTO', fields: { 'Субъект': 'Капли крови Прототипа #02', 'Статус': 'ЗАШИФРОВАНО', 'Тип угрозы': 'Высокий риск детонации' }, note: '«Запись получена после расшифровки: Нам удалось стабилизировать кристаллизованные ткани Бета. При нагревании эфирной горелкой они излучают чистый резонанс мантии воздуха без химических реагентов. Можно использовать как детонатор.»', hidden: false },
+            
+            { id: 'p21', section: 4, title: 'Протокол инцидента: Сектор «Тишина»', locked: true, password: 'OTTO', fields: { 'Зона поражения': 'Подземный уровень -4 (Изолятор)', 'Причина активации': 'Сбой систем герметизации', 'Уровень угрозы': 'БИОЛОГИЧЕСКОЕ ЗАРАЖЕНИЕ' }, note: '«Система жизнеобеспечения в секторе "Тишина" отключилась ровно в 03:00. Десятки бракованных клонов, сброшенных в камеры утилизации, начали подавать признаки мышечной активности из-за утечки эфирного конденсата в вентиляцию. Они не умерли. Они просто спали, ожидая тепла человеческих тел. Я лично заварил стальные шлюзы этого сектора. Пусть кричат в темноте. Звукоизоляция работает безупречно».', hidden: false },
+            
+            { id: 'p25', section: 4, title: 'Эксперимент #25 (Секрет Резонанса)', locked: true, password: 'OMEGA', fields: { 'Тема': 'Математическая формула 10% + 10%', 'Доступ': 'ТОЛЬКО ДЛЯ МЕНЯ' }, note: '«Формула закольцовывания: при угле вращения потока ветра в 18 градусов и одновременном преломлении светового поля иллюзии на 180 градусов, 10% превращаются в замкнутый вечный двигатель. Омега не должен прочитать эту запись ни при каких обстоятельствах!»', hidden: false },
+            
+            // СУПЕР СЕКРЕТНЫЙ ФАЙЛ
+            { id: 's99', section: 4, title: 'ИСТИННЫЙ ГЕНЕЗИС', locked: false, password: '', fields: { 'Уровень доступа': 'АБСОЛЮТНЫЙ [РАЗБЛОКИРОВАНО ОМЕГОЙ]', 'Тема': 'Синтез жизни и природа души' }, note: '«Я потратил десятилетия, пытаясь понять, почему первые прототипы рождались "пустыми", безвольными кусками мяса. Ответ пришел из древних хроник: алхимия может скопировать кровь, кости и даже магию, но душа не подлежит репликации.\n\nЧтобы клонированное тело жило, мне пришлось создать систему "Якорного Резонанса" — искусственные нервные узлы в спинном мозге клонов, способные принудительно притягивать свободный эфир и удерживать его, имитируя сознание. \n\nЯ не создаю жизнь. Я создаю пустые, но идеально настроенные радиоприемники, ждущие единственного сигнала — загрузки моего собственного разума. Омега — мой величайший шедевр, приемник, который не перегорит при подключении.»', hidden: true },
+            // --- РАЗДЕЛ 5: СЕЗОН II ---
+            {"id": "r1", "section": 5, "title": "Реестр прототипов", "locked": false, "ask": "Сколько номеров из ряда #01–#19 отсутствует в открытом архиве?", "password": ["10", "ДЕСЯТЬ"], "fields": {"Назначение": "Сводный учёт утилизации", "Изъято из открытых записей": "Десять номеров", "Из них в камерах сектора «Тишина»": "Девять"}, "note": "«Сводка для себя. Девять номеров я похоронил в Тишине вместе с их криками. Десятый ушёл другим путём, и о нём вслух не говорят. Шлюзы сектора записывали звук всё это время. Стук идёт не случайно: это азбука, латинская, как в инструкциях гражданской обороны. Запись лежит в lab/knock.aud».", "hidden": true, "tool": "morse", "who": "Личная заметка Отто Апокалипсиса:"},
+            {"id": "r2", "section": 5, "title": "Шлюзы сектора «Тишина»: опись", "locked": false, "ask": "Что именно простукивали шлюзы? Одно слово (русское или латинское).", "password": ["SLEEP", "СПЯТ"], "fields": {"Сброшено в камеры": "#03, #04, #06, #08, #10, #13, #15, #16, #17", "Всего": "9 прототипов", "Состояние шлюзов": "Заварены, звукоизоляция в норме"}, "note": "«Список тех, кто спит. Номера считать по порядку: у каждого из тех десяти, что я вычеркнул из открытого архива, была своя судьба. Девять из них здесь. Десятого здесь нет, и он единственный, кто не гнил в темноте: по нему было публичное решение Совета. Но шлюзы стучат и внутри сектора: слушай knock2.aud. Номер десятого и есть ключ к следующей записи».", "hidden": true, "tool": null, "who": "Личная заметка Отто Апокалипсиса:"},
+            {"id": "r3", "section": 5, "title": "Метод «Подмена»", "locked": false, "ask": "Номер прототипа, которого казнили вместо Отто (в этой описи его нет).", "password": ["12", "ДВЕНАДЦАТЬ"], "fields": {"Источник": "Жена, чистокровная Кицунэ (я выдавал себя за Кицунэ)", "Метод": "Естественное оплодотворение, затем изъятие клеток во сне", "Снотворное": "Крепкий настой кицунэйских трав («лекарство»)", "Камеры роста": "Облучение и препараты, малые правки", "Дублёр": "Прототип #12"}, "note": "«Она ничего не знала. Ей казалось, что мы просто долго пытаемся завести ребёнка. Каждую ночь я давал ей отвар «от бессонницы», а утром выращивал то, что взял. Остальное делали камеры: излучение, препараты, малые правки по одной. Когда вскрылось, что я не Кицунэ, а обычный маг, Совет приказал казнить. На эшафот пошёл #12, убедительный, как я сам. Я остался в лабораториях. Контрольный замер Омеги лежит в калибраторе «Петри» (lab/petri.exe)».", "hidden": true, "tool": null, "who": "Личная заметка Отто Апокалипсиса:"},
+            {"id": "r4", "section": 5, "title": "Петри: калибровка Омеги", "locked": false, "ask": "Порядковый номер прототипа с магическим потенциалом 0.0%.", "password": ["7", "СЕМЬ"], "fields": {"Объект": "Прототип #19 «Омега»", "Воздух (замер)": "12%", "Иллюзии (замер)": "12%", "В отчёте указано": "10% и 10%"}, "note": "«В отчёт я записал 10 и 10 и решил, что 10×10 это ровно сотня, равная Сигме, то есть безопасно. Прибор честен: 12 и 12. Резонанс перемножает, а не складывает. Это ошибка расчёта, и я её нашёл только сегодня. Итоговая мощность замкнутого резонанса Омеги: 12×12, то есть 144. Дорогу в бункер я оставил на кристалле. Окраску камеры №19 я задал тремя числами из этой записи: оттенок, насыщенность и яркость (chamber.exe)».", "hidden": true, "tool": null, "who": "Личная заметка Отто Апокалипсиса:"},
+            {"id": "r5", "section": 5, "title": "Сейф терминала", "locked": false, "ask": "Итоговая мощность резонанса Омеги, %.", "password": ["144"], "fields": {"Содержимое": "Две ампулы «В-04»", "Приёмник": "Настроен на частоту 94.3", "Пометка": "«Слушай, когда тихо»"}, "note": "«Кроме ампул, я держу в сейфе приёмник. Он ловит то, что шепчет под терминалом, когда выключен свет. Я не знаю, что это. Иногда мне кажется, что это он, мой гость».", "hidden": true, "tool": "radio", "who": "Личная заметка Отто Апокалипсиса:"},
+            {"id": "r6", "section": 5, "title": "Всё, что я знаю о хранителях", "locked": false, "ask": "Слово, которое прошептал приёмник (русское или латинское).", "password": ["STONE", "КАМЕНЬ"], "fields": {"Источник": "Со слов К. и мои догадки", "Хранителей": "Пять", "Природа": "Живые, смертные, «можно пережить»", "Орден": "«Дети света», иногда «дети солнца» (путаю)", "Известные имена": "Кродхор, Хельга"}, "note": "«Хранителей пять. Сколько точно, не помню: К. говорил то „пятеро“, то „они все“. Кродхор и Хельга, имена назвал мимоходом. Свои называл только первой буквой. Скрижаль делится на части, у каждой свой хранитель. Если пережить хранителя, его часть достанется мне. Я не знаю, чем кончается жизнь у детей света, но подозреваю, что они умирают, как все». К. говорил, что у каждого хранителя есть цвет печати: у Кродхора красный, у Хельги зелёный, а свой он назвал золотым.", "hidden": true, "tool": null, "who": "Личная заметка Отто Апокалипсиса:"},
+            {"id": "r7", "section": 5, "title": "Выписка из хроники детей солнца", "locked": false, "ask": "Сколько хранителей по записи Отто (число или слово)?", "password": ["5", "ПЯТЬ"], "fields": {"Хранителей": "Трое (по выписке)", "Имена": "Карэру, Кродхор, Хельга", "Знаки": "Не имеют", "Состояние": "Запечатаны в своих фрагментах Скрижали и охраняют их"}, "note": "Я достал выписку из хроники Кицунэ и переписал её здесь. Хранителей трое, а не пятеро. Они не смертны и не живы: каждый заключён в свой фрагмент Скрижали и охраняет его. Тот, кто хочет фрагмент, должен пережить не человека, а печать. Выходит, что «дети света» и «дети солнца» один и тот же орден. Я путал их. Гость выдал имя верно, а остальное, видимо, я додумал сам Печати хранителей, в порядке имён: Карэру золотая, Кродхор серая, Хельга синяя.", "hidden": true, "tool": null, "who": "Личная заметка Отто Апокалипсиса:"},
+            {"id": "r8", "section": 5, "title": "Запись 0: Гость", "locked": false, "ask": "Какого из трёх хранителей Отто никогда не называл по имени?", "password": ["KARERU", "КАРЭРУ", "КАРЕРУ"], "fields": {"Время записи": "До Прототипа #01", "Участники": "Я и гость", "Значение": "Начало Проекта"}, "note": "«Сегодня я встретил крайне… занимательную личность. Он назвался Карэру и несколько часов хвастался передо мной скрижалью детей солнца, как хвастаются фамильным серебром, которое невозможно украсть. Он принял меня за своего: лисья личина, которой я так гордился, наконец пригодилась. Он не заметил, что я считаю каждое его слово. Обмолвился, что скоро „уйдёт в неё целиком“. Не понял, что он имел в виду. Я должен получить такую силу. Или саму Скрижаль. Да. Но моя кровь не примет чужую природу. Значит, нужны будут не я, а мои копии».", "hidden": true, "tool": null, "who": "Запись 0 (самая первая):"},
+            {"id": "r9", "section": 5, "title": "Жена: ночной отвар", "locked": false, "fields": {"Что она знала": "Что мы с ней пытаемся завести ребёнка", "Что я ей говорил": "Что отвар — лекарство от бессонницы", "Её привычка": "Напевала одну и ту же мелодию, засыпая", "Запись": "Лежит рядом: lullaby.exe"}, "note": "«Она пила отвар из моих рук, как пьют от человека, которому верят. Сон наступал через девять минут. Вины я не чувствовал: вина — роскошь тех, у кого есть время. Одного я не смог вычислить — мелодию. Она напевала её всегда, засыпая: одну и ту же, без слов. Я записал её для себя. Не могу объяснить зачем».", "hidden": true, "tool": null},
+            {"id": "r10", "section": 5, "title": "Колыбельная", "locked": false, "fields": {"Источник": "Жена, засыпающая от отвара", "Наблюдение": "Клетки в камерах роста реагируют на мелодию", "Камера, где реакция сильнее всего": "№19"}, "note": "«Заметил случайно: когда в лаборатории включали запись, клетки делились ровнее. Камера №19 отзывалась заметнее остальных. Я повторил опыт на всех камерах, и только в одной это сработало так. Совпадением это быть не может: я в них не верю. Пока не пойму, что связывает её голос и этот материал, камеру №19 не трогать».", "hidden": true, "tool": null},
+            {"id": "r11", "section": 5, "title": "Субъект «Аи»: протокол запуска", "locked": false, "fields": {"Носитель": "Бывшая Тинъюнь, чистокровная Кицунэ", "Статус": "Искусственная личность стабильна", "Слабое место": "Имя исходной личности"}, "note": "«Программа «Аи» держится безупречно. Улыбчива, услужлива, не помнит ничего старше моего вмешательства. Но у программы есть шов: стоит произнести имя исходной личности, как у субъекта дёргается левая рука, а взгляд уходит в сторону. Произносить его вслух запретил. Если запустить ядро в обратную сторону, подавление можно ослабить. Проверять не стану: в хорошей машине лишний рычаг — это слабость».", "hidden": true, "tool": null},
+            {"id": "r12", "section": 5, "title": "Исходная личность: обрывки", "locked": false, "fields": {"Носитель": "Тинъюнь", "Статус": "Подавлена, но слышит", "Длительность прорыва": "Девять секунд"}, "note": "«Девять секунд. Столько она продержалась, прежде чем программа вернула контроль. Я записал всё, что она сказала: «Верни мне имя». «Это моё тело». Если исходная личность вернётся полностью, она поведёт себя как зверь, у которого отняли дом: сначала задавит Аи, потом пойдёт за тем, кто это сделал. Придётся учесть и такой исход».", "hidden": true, "tool": null},
+            {"id": "r13", "section": 5, "title": "Шов", "locked": false, "fields": {"Вывод": "Подавление не стирает, а прячет", "Риск": "Встреча исходной личности с Омегой"}, "note": "«Читаю обе записи рядом и вижу одно: Аи и Тинъюнь не две личности, а один человек, которому дали два имени. Подавление ничего не стёрло. Если Омега и она встретятся в бункере, ядро может рассыпаться без моей руки. Оставлю себе строку в протоколе «В-15»: не произносить её имя при Омеге».", "hidden": true, "tool": null},
+            {"id": "r14", "section": 5, "title": "Окраска камеры №19", "locked": false, "fields": {}, "note": "«Серо-зелёный, почти чёрный: цвет остывающего экрана. Окраску камеры я задал тремя числами и не стал хранить их рядом: оттенок это замкнутый резонанс, насыщенность это предел, яркость это номер объекта. Цвет подобран так, чтобы материал не видел собственный резонанс».", "hidden": true, "tool": null},
+            {"id": "egg", "section": 5, "title": "plan_B.txt", "locked": false, "fields": {}, "note": "Конечно, я предусматриваю неудачу. Это самая базовая из основ учёного. Конечно, есть шанс, что Омега сможет одолеть меня. Если этот файл кто-то читает, значит, готовился я явно не зря.", "hidden": true, "tool": null},
+            {"id": "mad", "section": 5, "title": "ыекфтпу.ащду", "locked": false, "fields": {}, "note": "'nj yjhvfkmyj. 'nj yjhvfkmyj. Rf;lsq, rnj [jntk ,jkmituj, i`k uke,;t, pyfxbn, z ble ghfdbkmyj. Z yt gjvy., rjulf cgfk d gjcktlybq hfp, yj cjy ye;ty ntv, e rjuj tcnm dhtvz. Z cksie, rfr rjgbb itgxen d rfvthf[, b 'nj nj;t yjhvfkmyj: nfr pdexbn ecgt[. Zve e;t yt pfcsgfnm, gj'njve t` ye;yj rjgfnm lfkmit. Tckb jcnfyjdk.cm ctqxfc, dc` ,skj phz: gznyflwfnm, itcnyflwfnm, ctvyflwfnm, pfxtv z b[ cxbnfk. Jy ujdjhbk: Crhb;fkm. Z rbdfk. Z rbdf. lj cb[ gjh. Uke,;t. Njkmrj uke,;t. Nfr b ljk;yj ,snm. Ghfdlf dtlm? 'nj yjhvfkmyj. 'nj yjhvfkmyj. 'nj yjhvfkmyj.", "hidden": true, "tool": null},
+            {"id": "l1", "section": 5, "title": "Кродхор", "locked": false, "fields": {"Что знаю": "Имя и слух", "Источник": "Со слов К."}, "note": "«Кродхор. Имя назвали мимоходом, как называют погоду. По словам К., он упрям, как камень, из которого его вырезали, и не покидает своего места. Не знаю, шутка ли это. Если правда, пережить его можно только терпением, а терпения у меня достаточно».", "hidden": true, "tool": null},
+            {"id": "l2", "section": 5, "title": "Хельга", "locked": false, "fields": {"Что знаю": "Имя и одна фраза", "Источник": "Со слов К."}, "note": "«Хельга. О ней К. говорил тише всего. Однажды назвал её «той, кто слушает». Я записал дословно и не понял. Если слушает, значит, ей можно сказать то, чего она не сможет не услышать. Нужно придумать, что».", "hidden": true, "tool": null},
+            {"id": "l3", "section": 5, "title": "Дочь культа", "locked": false, "fields": {"Что знаю": "Слух", "Достоверность": "Низкая"}, "note": "«Старый слух от лис: в культе детей солнца одна женщина провела с хранителем ночь, о которой в роду предпочитают не вспоминать. Детей не вышло, а род продолжился иначе. Имя в хронике стёрто, но линия, которой она дала начало, дожила до Совета. Выяснять не стану. Пока».", "hidden": true, "tool": null},
+            {"id": "l4", "section": 5, "title": "Ночь эшафота", "locked": false, "fields": {"Прототип": "#12", "Результат": "Приговор исполнен"}, "note": "«Отчёт о казни. Прототип #12 вышел на эшафот в моём лице и в моём плаще и молчал до конца. Совет ничего не заметил. Лучшее, что могу сказать о собственной работе: он умер убедительнее, чем смог бы я. Меня в тот час не было в городе. Меня вообще нигде не было».", "hidden": true, "tool": null}
+        ];
+
+console.log('%cЗАПИСЬ ОБСЛУЖИВАНИЯ №0019','color:#ffa02e;font-size:16px'); console.log('Оператор, ты смотришь в корпус. В исходнике страницы оставлена запись. Основание: 64.');
+const $ = id => document.getElementById(id);
+let selected = 'p1', pending = null, omega = false, hintIdx = 0, muted = false;
+
+/* ================= AUDIO ================= */
+let ac, master, noiseBuf, hum1, hum2;
+function initAudio(){
+  if(ac){ if(ac.state==='suspended') ac.resume(); return; }
+  const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+  ac = new AC(); master = ac.createGain(); master.gain.value = muted?0:1; master.connect(ac.destination);
+  noiseBuf = ac.createBuffer(1, ac.sampleRate*2, ac.sampleRate);
+  const d = noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  // low server hum
+  const hg = ac.createGain(); hg.gain.value = .07;
+  const lp = ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=150;
+  hum1 = ac.createOscillator(); hum2 = ac.createOscillator();
+  hum1.type = hum2.type = 'sawtooth'; hum1.frequency.value=48; hum2.frequency.value=50.6;
+  hum1.connect(lp); hum2.connect(lp); lp.connect(hg); hg.connect(master);
+  const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value=.35; lg.gain.value=.015;
+  lfo.connect(lg); lg.connect(hg.gain);
+  // fan hiss
+  const ns = ac.createBufferSource(); ns.buffer=noiseBuf; ns.loop=true;
+  const nf = ac.createBiquadFilter(); nf.type='lowpass'; nf.frequency.value=380;
+  const ng = ac.createGain(); ng.gain.value=.03; ns.connect(nf); nf.connect(ng); ng.connect(master);
+  [hum1,hum2,lfo,ns].forEach(n=>n.start());
+}
+function tone(type,f0,f1,dur,vol){
+  if(!ac) return; const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+  o.type=type; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(Math.max(f1,20),t+dur);
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+.02);
+}
+function hiss(dur,vol,freq){
+  if(!ac) return; const t=ac.currentTime, s=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain();
+  s.buffer=noiseBuf; f.type='bandpass'; f.frequency.value=freq||2400; f.Q.value=.9;
+  g.gain.setValueAtTime(vol,t); g.gain.linearRampToValueAtTime(0,t+dur);
+  s.connect(f); f.connect(g); g.connect(master); s.start(t,Math.random()); s.stop(t+dur);
+}
+const uiClick  = () => { kc(false,false); setTimeout(()=>kc(false,true),55); };
+function kc(big,up){ if(!ac) return; const t=ac.currentTime, s=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain();
+  s.buffer=noiseBuf; f.type='bandpass'; f.frequency.value=(up?3600:2300)+Math.random()*900; f.Q.value=1.3;
+  g.gain.setValueAtTime(up?.07:.18,t); g.gain.exponentialRampToValueAtTime(.0001,t+(up?.02:.035));
+  s.connect(f); f.connect(g); g.connect(master); s.start(t,Math.random()*1.5); s.stop(t+.05);
+  if(!up) tone('sine',(big?105:165)+Math.random()*35,50,big?.08:.05,big?.18:.11); }
+const keyClick = big => kc(big,false);
+const buzz     = () => { tone('sawtooth',120,70,.45,.1); tone('square',60,50,.45,.06); };
+const okChime  = () => { tone('sine',660,660,.18,.07); setTimeout(()=>tone('sine',990,990,.3,.07),130); };
+function setMute(m){ muted=m; if(master) master.gain.value=m?0:1; $('muteBtn').classList.toggle('off',m); if(m&&window.speechSynthesis) speechSynthesis.cancel(); }
+$('muteBtn').onclick = () => { initAudio(); setMute(!muted); };
+
+document.addEventListener('pointerdown', e => { initAudio(); if(e.target.closest('button,.nav-item')) uiClick(); }, true);
+const KEYS=k=>k.length===1||['Backspace','Enter','Delete'].includes(k);
+document.addEventListener('keydown', e => { initAudio(); if(e.target.matches('input') && KEYS(e.key) && (!e.repeat||e.key==='Backspace')) kc(e.key===' '||e.key==='Enter'||e.key==='Backspace',false); }, true);
+document.addEventListener('keyup', e => { if(e.target.matches('input') && KEYS(e.key)) kc(false,true); }, true);
+
+/* ================= TOAST + VOICE ================= */
+let toastT;
+function toast(title, msg, ms=7000){
+  const t=$('toast'); t.innerHTML=`<b>${title}</b><span>${msg}</span>`; t.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),ms);
+}
+const VOICE_PITCH=.85, VOICE_RATE=.88;   // подстройка озвучки: 1 = обычный голос
+function pickVoice(){ const v=(window.speechSynthesis.getVoices()||[]).filter(x=>/^en/i.test(x.lang));
+  return v.find(x=>/Daniel|Google UK English Male|David|Alex|Fred|Guy/i.test(x.name))||v.find(x=>x.lang==='en-GB')||v.find(x=>x.lang==='en-US')||v[0]; }
+function speak(text){
+  if(muted || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel(); hiss(.4,.05,2800);
+  const parts=text.split(/(?<=[.!?])\s+/); const v=pickVoice();
+  parts.forEach((t,i)=>{ const u=new SpeechSynthesisUtterance(t); if(v){ u.voice=v; u.lang=v.lang; } else u.lang='en-US';
+    u.pitch=VOICE_PITCH; u.rate=VOICE_RATE; u.volume=1; if(i===0) u.onstart=()=>hiss(.6,.025,2400); setTimeout(()=>speechSynthesis.speak(u),i?0:300); });
+}
+
+/* ================= BOOT ================= */
+function checkBoot(){
+  const v=$('bootPass').value.trim().toLowerCase();
+  if(v==='valkyrie'||v==='kaslana'){
+    $('bootBox').style.borderColor='var(--accent)';
+    $('bootDesc').innerHTML=`<span class="egg">«Знаешь... Ты ведь наверняка думаешь, что я конченый ублюдок, играющий чужими жизнями в пробирках. Но если подумать рационально... Разве я действительно хуже тех высокомерных Архимагов, чьим указам вы слепо подчиняетесь, обрекая мир на стагнацию? Они прячут свои ошибки за лицемерными законами, а я открыто признаю цену прогресса. Впрочем, к чему мне оправдываться перед тем, кто просто смотрит на экран... Вводи настоящий ключ, если осмелишься идти дальше».</span>`;
+    $('bootPass').style.display='none'; $('bootErr').style.display='none';
+    $('bootBtn').textContent='Перезагрузить терминал'; $('bootBtn').onclick=()=>location.reload(); return;
+  }
+  if(v==='rizagein'){ okChime(); $('boot').classList.remove('on'); toast('СИСТЕМА','Доступ разрешён. Кнопка [ OVERRIDE LINK ]: клик — подсказка, удержание — оверрайд.',8000); }
+  else { buzz(); $('bootErr').style.display='block'; $('bootBox').classList.remove('shake'); void $('bootBox').offsetWidth; $('bootBox').classList.add('shake'); }
+}
+$('bootBtn').onclick=checkBoot;
+$('bootPass').addEventListener('keydown',e=>{ if(e.key==='Enter') $('bootBtn').onclick(); });
+
+/* ================= ARCHIVE ================= */
+const SECTIONS = {
+  1:'Раздел I: ГЕНЕЗИС-ДУАЛ (Хроники бракованных оболочек)',
+  2:'Раздел II: Серия «B» (Сторонние исследования)',
+  3:'Раздел III: Классифицированные Высшие Субъекты',
+  4:'Раздел IV: Секретные Записи и Технологии',
+  5:'Раздел V: СЕЗОН II · Погребённые логи'
+};
+function renderSidebar(newId){
+  const side=$('side'); side.innerHTML='';
+  for(let s=1;s<=5;s++){
+    const h=document.createElement('div'); h.className='sec'; h.textContent=SECTIONS[s]; side.appendChild(h);
+    archiveData.filter(d=>d.section===s && !d.hidden).forEach(doc=>{
+      const el=document.createElement('div');
+      el.className='nav-item'+(doc.id===selected?' active':'')+(doc.id===newId?' new':'');
+      el.tabIndex=0; el.setAttribute('role','button');
+      el.innerHTML=`<span>${doc.title}</span><span class="badge ${doc.locked?'lock':'ok'}">${doc.locked?'БЛОК':'OK'}</span>`;
+      el.onclick=()=>selectDoc(doc.id);
+      el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectDoc(doc.id); } };
+      side.appendChild(el);
+    });
+    if(s===5){ const e=document.createElement('div'); e.className='nav-item'+(selected==='shell'?' active':'')+(F.power&&!F.opened?' new':''); e.tabIndex=0;
+      e.innerHTML='<span>▮ ПРОВОДНИК ОТТО</span><span class="badge lock">'+(F.power?(F.opened?'OPEN':'НОВОЕ'):'ОБЕСТОЧЕН')+'</span>'; e.onclick=openShell; side.appendChild(e); }
+  }
+}
+function selectDoc(id){
+  const doc=archiveData.find(d=>d.id===id); if(!doc) return;
+  if(doc.locked){
+    pending=doc; $('lockName').textContent=doc.ask?`«${doc.title}»: ${doc.ask}`:`Запись «${doc.title}» зашифрована. Введите код дешифровки.`;
+    $('lockPass').value=''; $('lockErr').style.display='none'; $('lock').classList.add('on'); $('lockPass').focus(); return;
+  }
+  selected=id; renderSidebar(); renderDoc(doc);
+}
+function renderDoc(doc){
+  const f=Object.entries(doc.fields).map(([k,v])=>`<dl class="field"><dt>${k}:</dt><dd>${v}</dd></dl>`).join('');
+  const v=$('view');
+  v.innerHTML=`<article class="card">
+    <div class="card-head"><div><div class="doc-title">${doc.title}</div><div class="doc-meta">Идентификатор: ARCHIVE_${doc.id.toUpperCase()}</div></div>
+    <span class="badge ok">Доступ разрешён</span></div>${f}
+    <div class="note"><h4>${doc.who||(doc.id==='s99'?'Секретная запись:':'Личная заметка Отто Апокалипсиса:')}</h4><p>${doc.note.replace(/\n/g,'<br>')}</p></div>${doc.tool==='morse'?'<p style="margin-top:18px"><button class="btn" id="playM">▶ Воспроизвести лог шлюзов</button></p>':''}${doc.tool==='radio'?'<p style="margin-top:18px;font-size:13px">Приёмник: <b id="fq">88.0</b> МГц<br><input type="range" id="tune" min="880" max="1080" value="880" style="width:100%;accent-color:var(--accent)"></p>':''}</article>`;
+  if(doc.tool==='morse') $('playM').onclick=playMorse;
+  if(doc.tool==='radio') initRadio();
+  v.scrollTop=0;
+}
+function checkLock(){
+  const v=$('lockPass').value.trim().toUpperCase();
+  if(pending && [].concat(pending.password).includes(v)){ pending.locked=false; const id=pending.id; closeLock(); okChime(); selectDoc(id); }
+  else { buzz(); $('lockErr').style.display='block'; $('lockBox').classList.remove('shake'); void $('lockBox').offsetWidth; $('lockBox').classList.add('shake'); }
+}
+function closeLock(){ $('lock').classList.remove('on'); pending=null; }
+$('lockOk').onclick=checkLock; $('lockNo').onclick=closeLock;
+$('lockPass').addEventListener('keydown',e=>{ if(e.key==='Enter') checkLock(); if(e.key==='Escape') closeLock(); });
+
+/* ================= OVERRIDE LINK ================= */
+const HINTS = [
+  { en:'Transmission intercepted. The terminal key is written on a sticker. Look at the frame of the monitor.',
+    ru:'Ключ терминала записан на стикере. Смотри на рамку монитора.' },
+  { en:'Archive key. Four letters. The author of every private note. It reads the same, forwards and backwards.',
+    ru:'Ключ архива: четыре буквы. Автор всех личных заметок. Читается одинаково в обе стороны.' },
+  { en:'Master key. Two halves. The door key, read from its end. Then the power of the blank canvas, once the resonance is closed. Hold the link to enter it.',
+    ru:'Мастер-код из двух половин: ключ входа, прочитанный с конца, и число, которое покажет калибровка Омеги (замкнутый резонанс). Удерживай кнопку, чтобы ввести код.' }
+];
+const btn=$('overrideBtn'); let holdT=null, held=false;
+function startHold(e){
+  if(omega || e.button>0) return; held=false; btn.classList.add('holding');
+  holdT=setTimeout(()=>{ held=true; btn.classList.remove('holding'); openCrit(); },800);
+}
+function endHold(){ clearTimeout(holdT); btn.classList.remove('holding'); }
+btn.addEventListener('pointerdown',startHold);
+['pointerup','pointerleave','pointercancel'].forEach(n=>btn.addEventListener(n,endHold));
+btn.addEventListener('contextmenu',e=>e.preventDefault());
+btn.addEventListener('click',()=>{
+  if(held){ held=false; return; }
+  if(omega){ speak('Welcome back, Omega. The vessel is yours.'); toast('РАДИО-ШИФР // ПЕРЕХВАТ','Добро пожаловать, Омега. Сосуд принадлежит тебе.'); return; }
+  const w=hintWait(); if(w>0){ toast('РАДИО-ШИФР // ПЕРЕХВАТ','Канал занят. Следующий перехват через '+fmt(w)+'.',5000); return; } lastProg=Date.now(); HU++;
+  if(F.opened&&!F.done){ toast('РАДИО-ШИФР // ПЕРЕХВАТ',stageHint(),9000); speak('Transmission received. Check the console, operator.'); return; }
+  const h=HINTS[hintIdx%HINTS.length]; hintIdx++;
+  toast(`РАДИО-ШИФР // ПЕРЕХВАТ · ${hintIdx>HINTS.length?'повтор':hintIdx+'/'+HINTS.length}`,h.ru,9000); speak(h.en);
+});
+
+function openCrit(){
+  if(window.speechSynthesis) speechSynthesis.cancel();
+  buzz(); $('critPass').value=''; $('critErr').style.display='none'; $('crit').classList.add('on'); $('critPass').focus();
+}
+function closeCrit(){ $('crit').classList.remove('on'); }
+function checkCrit(){
+  if($('critPass').value.toUpperCase().replace(/[^A-Z0-9А-Я]/g,'')==='NIEGAZIR144'){ closeCrit(); reboot(); }
+  else { buzz(); $('critErr').style.display='block'; $('critBox').classList.remove('shake'); void $('critBox').offsetWidth; $('critBox').classList.add('shake'); }
+}
+$('critOk').onclick=checkCrit; $('critNo').onclick=closeCrit;
+$('critPass').addEventListener('keydown',e=>{ if(e.key==='Enter') checkCrit(); if(e.key==='Escape') closeCrit(); });
+
+/* ================= REBOOT ================= */
+const STEPS=[
+  ['Перезапись прав доступа...',1400],['Деактивация протокола Патриарха...',1300],
+  ['Подключение субъекта Омега...',1700],['Снятие грифов секретности...',1300],['Синхронизация архива...',1100]
+];
+function reboot(){
+  const r=$('reboot'), log=$('rlog'), bar=$('rbar'); log.innerHTML=''; bar.style.width='0';
+  r.classList.add('on'); void r.offsetWidth; r.classList.add('show');
+  tone('sawtooth',50,420,5,.06); if(hum1) hum1.frequency.linearRampToValueAtTime(30,ac.currentTime+4);
+  let i=0;
+  (function next(){
+    if(i>=STEPS.length){ return setTimeout(finish,900); }
+    const [txt,d]=STEPS[i++]; log.insertAdjacentHTML('beforeend',`&gt; ${txt}<br>`);
+    bar.style.width=(i/STEPS.length*100)+'%'; hiss(.12,.05,1800); setTimeout(next,d);
+  })();
+  function finish(){
+    omega=true; document.body.classList.add('omega');
+    const st=$('statusText'); st.textContent='ОМЕГА АКТИВИРОВАН';
+    archiveData.forEach(d=>{ if(d.id==='s99') d.hidden=false; if(d.id==='p25') d.locked=false; });
+    if(hum1){ hum1.frequency.value=62; hum2.frequency.value=64.2; }
+    btn.textContent='[ LINK: OMEGA ]';
+    renderSidebar('s99'); if(selected==='shell') drawEx(); else renderDoc(archiveData.find(d=>d.id===selected)||archiveData[0]);
+    r.classList.remove('show'); okChime(); tone('sine',220,880,1.2,.08);
+    setTimeout(()=>{ r.classList.remove('on');
+      toast('СИСТЕМА // ОМЕГА','Протокол Патриарха уничтожен. Доступ передан. Открыты записи: «Секрет Резонанса» и «ИСТИННЫЙ ГЕНЕЗИС».',10000); },1100);
+  }
+}
+
+
+/* ===== Сезон II: оболочка и головоломки ===== */
+const F={}; const rec=id=>archiveData.find(d=>d.id===id);
+const T={c:{ 'readme.txt':{r:'rd'},personal:{c:{'krodhor.txt':{r:'l1'},'helga.txt':{r:'l2'},'cult.txt':{r:'l3'},'scaffold.txt':{r:'l4'}}},'plan_B.txt':{r:'egg',g:'egg',hid:1},'ыекфтпу.ащду':{r:'mad',g:'mad',hid:1,mad:1},
+ lab:{c:{'registry.log':{r:'r1'},'knock.aud':{x:'morse'},'petri.exe':{x:'oct'},'petri.log':{r:'r4',g:'oct'},'crystal.img':{x:'heat'},'pollen.doc':{x:'lie'},
+   tishina:{g:'morse',c:{'manifest.txt':{r:'r2'},'knock2.aud':{x:'morse2'},'metod.txt':{r:'r3',g:'k2'},wife:{g:'r3',hid:1,c:{'tonic.log':{r:'r9'},'lullaby.exe':{x:'lull'},'lullaby.log':{r:'r10',g:'lull',hid:1}}}}},b15:{g:'lie',hid:1,c:{'core.exe':{x:'core'},'ai.log':{r:'r11',g:'ai',hid:1},'tinyun.log':{r:'r12',g:'tin',hid:1},'.merge.log':{r:'r13',g:'both',hid:1}}}}},
+ bunker:{g:'heat',c:{'radio.exe':{x:'radio'},'notes.txt':{r:'r6'},'chamber.exe':{x:'col'},'chamber.log':{r:'r14',g:'col',hid:1},'guest.txt':{r:'r8',g:'final'},
+   '.chronicle':{g:'radio',hid:1,c:{'chronicle.txt':{r:'r7'}}}}}}};
+const GM={k2:'Файл зашифрован. Шлюзы стучат и внутри сектора: запусти knock2.aud.',morse:'Шлюз заварен. Услышь, что в нём стучит: запусти knock.aud',heat:'Сектор опечатан. Путь оставлен на изображении: lab/crystal.img (шестерёнка)',radio:'Скрытая папка закрыта: настрой приёмник в бункере (radio.exe).',oct:'Калибратор не запущен: запусти petri.exe',final:'Нужны: калибровка Петри, проверка лжи, радио, окраска камеры №19 (chamber.exe) и прочитанные notes.txt и хроника.'};
+let path=[T],pn=['~'],askMode=0;
+const cur=()=>path[path.length-1];
+const LULLABY_SRC='';   // сюда можно вставить свой звук: 'lullaby.mp3' рядом с файлом или data:audio/mpeg;base64,...
+const IC={d:'<svg viewBox="0 0 48 40"><path d="M3 6h14l4 5h24v26H3z" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
+ f:'<svg viewBox="0 0 40 48"><path d="M6 3h20l10 10v32H6zM26 3v10h10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M12 24h16M12 31h16M12 38h10" stroke="currentColor" stroke-width="2"/></svg>',
+ x:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 4v8M24 36v8M4 24h8M36 24h8M10 10l6 6M32 32l6 6M38 10l-6 6M16 32l-6 6" stroke="currentColor" stroke-width="2.5"/></svg>'};
+const status=h=>{ const e=$('st'); if(e) e.innerHTML=h; }, out=h=>status(h);
+const vis=(n,k)=>!n.c[k].hid||F[n.c[k].g];
+const finalOk=()=>F.oct&&F.lie&&F.radio&&F.r6&&F.r7&&F.col;
+function recOut(id){ const d=rec(id); $('rv').innerHTML=`<div class="note"><h4>${d.title}</h4>${Object.entries(d.fields).map(([k,v])=>`<p>${k}: ${v}</p>`).join('')}<p style="margin-top:10px">${d.note}</p>${id==='egg'?'<div class="glitch" data-t="не так ли, Лоча?">не так ли, Лоча?</div>':''}${id==='r10'&&LULLABY_SRC?'<audio controls src="'+LULLABY_SRC+'" style="margin-top:12px;width:100%"></audio>':''}</div>`;
+  const g=$('rv').querySelector('.glitch'); if(g){ g.style.cursor='pointer'; g.onclick=()=>{ if($('pg2')) return; buzz();
+    g.insertAdjacentHTML('afterend','<p style="margin-top:16px"><button class="btn" id="pg2" style="background:#ff2e5b;color:#fff;padding:16px 20px">ВЫПОЛНИТЬ ОЧИСТКУ ЯДРА</button><br><small style="color:#ff7c97">Операция необратима. Нажимать запрещено.</small></p>'); $('pg2').onclick=crash; }; } }
+function openShell(){ selected='shell'; if(!F.power){ renderSidebar(); $('view').innerHTML='<div class="card"><div class="doc-title">ПРОВОДНИК ОБЕСТОЧЕН</div><p style="margin-top:14px;line-height:1.7">Линия питания модуля разомкнута. Программно её не включить: питание отсекается на самом корпусе. Осмотри монитор снаружи и изнутри.</p></div>'; $('flipBtn').classList.add('pulse'); toast('СИСТЕМА','Модуль обесточен. Осмотри корпус: ручка ⟲ внизу рамки.',8000); return; } F.opened=1; renderSidebar(); drawEx(); status('Открывай папки и файлы щелчком. Файлы-шестерёнки запускаются. Застрял: кнопка «Подсказка».'); }
+function drawEx(){ const n=cur();
+  const items=Object.keys(n.c).filter(k=>vis(n,k)).map(k=>{ const x=n.c[k], lk=x.g==='final'?!finalOk():(x.g&&!F[x.g]&&x.c);
+    return `<div class="it${lk?' lk':''}" data-k="${k}"><div class="ic">${x.c?IC.d:x.x?IC.x:IC.f}</div><div>${F.crash&&!x.mad?scr(k):k}${lk?'<br><small>закрыто</small>':''}</div></div>`; }).join('')+(cur()===T&&!F.egg?'<div class="it ghost" data-k="__ghost"><div class="ic">'+IC.f+'</div><div>&nbsp;</div></div>':'');
+  $('view').innerHTML=`<div class="card"><div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap"><button class="btn ghost" id="bk" style="margin:0">← Назад</button><span style="color:var(--dim);flex:1">${pn.join(' / ')}</span>${F.crash?'<button class="btn ghost" id="rs" style="margin:0">Аварийный перезапуск</button>':''}<button class="btn" id="hn">Подсказка</button></div><div class="grid">${items}</div><div id="st" style="margin-top:16px;color:var(--accent);min-height:22px"></div><div id="rv"></div></div>`;
+  $('bk').onclick=()=>{ if(path.length>1){ path.pop(); pn.pop(); drawEx(); } };
+  $('hn').onclick=()=>status(gatedHint()); if($('rs')) $('rs').onclick=()=>{ F.crash=0; document.title='АПОКАЛИПСИС ОС v5.02 // Терминал'; okChime(); drawEx(); status('Шифрование снято. Файлы восстановлены.'); };
+  $('view').querySelector('.grid').onclick=e=>{ const it=e.target.closest('.it'); if(it) openItem(it.dataset.k); }; }
+function finalAsk(){ const C=['#f2b134','#8a8a8a','#3d7bd9','#c43b3b','#3dbb6a','#e8e8e8'], tg=[0,1,2], P=[3,4,5];
+  pz('<h3>Печать Скрижали</h3><p>Три печати. Каждая открывается цветом своего хранителя. Кольца идут в порядке имён из хроники. Нажимай на кольцо, чтобы повернуть его.</p><div id="rg" style="display:flex;gap:22px;justify-content:center;margin:20px 0"></div><button class="btn" id="sk">Снять печати</button><div id="sm" style="font-size:12px;color:var(--danger);margin-top:10px"></div>');
+  const dr=()=>{ $('rg').innerHTML=P.map((p,i)=>`<div data-i="${i}" style="width:64px;height:64px;border-radius:50%;background:${C[p]};box-shadow:0 0 14px ${C[p]};cursor:pointer;border:3px solid #000"></div>`).join(''); }; dr();
+  $('rg').onclick=e=>{ const d=e.target.closest('[data-i]'); if(!d) return; P[+d.dataset.i]=(P[+d.dataset.i]+1)%6; uiClick(); dr(); };
+  $('sk').onclick=()=>{ if(cool('seal')>0) return $('sm').textContent='Охлаждение: '+cool('seal')+' с'; if(P.every((p,i)=>p===tg[i])) finale(); else { buzz(); fail('seal'); $('sm').textContent='Печати не поддаются.'; } }; }
+function finale(){ F.done=1; $('pz').classList.remove('on'); const f=$('fin'); f.classList.add('on'); f.style.color='#f2b134'; f.innerHTML='';
+  if(hum1) hum1.frequency.linearRampToValueAtTime(24,ac.currentTime+4); tone('sine',60,30,3,.15);
+  const L=['> Печати сняты.','> Обнаружена посторонняя подпись. Допуск не выдавался и не будет выдан.','> ID: КАРЭРУ','> Сканирование оператора...','> Сигнатура оператора совпадает с узлом КАРЭРУ: 97%.','> Источник совпадения не установлен.']; let i=0;
+  (function nx(){ if(i>=L.length) return setTimeout(()=>{ f.classList.remove('on'); if(hum1) hum1.frequency.value=48; drawEx(); recOut('r8');
+      $('rv').insertAdjacentHTML('beforeend','<p style="margin-top:16px"><button class="btn" id="endB">Завершить сезон</button></p>'); $('endB').onclick=endScreen; },1500);
+    f.insertAdjacentHTML('beforeend',L[i++]+'<br>'); hiss(.15,.06,1500); setTimeout(nx,1300); })(); }
+function endScreen(){ const f=$('fin'), tm=Math.floor((Date.now()-T0)/1000), fd=['ai','tin','lull','egg','mad'].filter(x=>F[x]).length; f.classList.add('on'); f.style.color='var(--accent)';
+  f.innerHTML=`<div class="doc-title" style="font-size:44px">СЕЗОН II · ЗАВЕРШЁН</div><div style="color:var(--dim);margin:6px 0 22px">Время: ${fmt(tm)} · Подсказок: ${HU} · Скрытых находок: ${fd} из 5</div>
+  &gt; ВХОДЯЩИЙ СИГНАЛ<br>&gt; узел ХЕЛЬГА: нет ответа<br>&gt; узел КРОДХОР: нет ответа<br>&gt; узел КАРЭРУ: <span style="color:#f2b134">сигнатура совпадает с оператором</span><br>&gt; следующий сеанс: ████<p style="margin-top:22px"><button class="btn" id="endX">Вернуться в архив</button></p>`;
+  $('endX').onclick=()=>f.classList.remove('on');
+  if(fd===5) setTimeout(ottoTakeover,2200); }
+function ottoTakeover(){ const o=$('otto'); o.classList.add('on'); o.innerHTML='<div id="ot" class="glitch2" style="font-size:38px;line-height:1.4"></div><p id="oc" style="display:none;margin-top:34px"><button class="btn ghost" id="ox">Закрыть</button></p>'; $('ox').onclick=()=>o.classList.remove('on');
+  const ot=$('ot'), G='▓▒░#@%&█', sc=(t,p)=>[...t].map(c=>Math.random()<p&&c!==' '?G[Math.floor(Math.random()*8)]:c).join('');
+  const L=['Ты нашёл каждую дверь.','Я знал, что найдёшь. Любопытство — единственное, что в тебе осталось от оригинала.','Скоро увидимся, Лоча.']; const done=[]; let li=0,ci=0,ph='type',sn=0,cur='';
+  if(hum1) hum1.frequency.linearRampToValueAtTime(30,ac.currentTime+3);
+  const rv=setInterval(()=>{ if(!o.classList.contains('on')) return clearInterval(rv); const ls=done.map(t=>sc(t,.05));
+    if(ph==='type') ls.push(sc(cur,.05)); else { sn++; const nm=sn<14?'Лоча':sn<22?(Math.random()<.5?'Лоча':'ОМЕГА'):(Math.random()<.05?'Лоча':'ОМЕГА'); ls.push(sc('Скоро увидимся, ',.03)+sc(nm,sn>=12&&sn<22?.5:.08)+'.'); if(sn===30) $('oc').style.display='block'; }
+    ot.innerHTML=ls.join('<br><br>')+(ph==='type'?'▌':''); },90);
+  (function ty(){ if(!o.classList.contains('on')) return;
+    if(ci<L[li].length){ ci++; cur=L[li].slice(0,ci); kc(false,false); return setTimeout(ty,75+Math.random()*95); }
+    if(li<2){ done.push(L[li]); li++; ci=0; cur=''; return setTimeout(ty,1100); }
+    setTimeout(()=>{ ph='swap'; },900); })(); }
+function openItem(k){ if(k==='__ghost'){ F.gh=(F.gh||0)+1; if(F.gh<3){ tone('sine',900,700,.05,.03); return; } F.egg=1; drawEx(); recOut('egg'); return status('Из пустоты проступил файл.'); } const n=cur(), t=n.c[k];
+  if(t.c){ if(t.g&&!F[t.g]) return status(GM[t.g]); path.push(t); pn.push(k); return drawEx(); }
+  if(F.crash&&!t.mad&&!t.c){ $('rv').innerHTML='<div class="note"><h4>ФАЙЛ ЗАШИФРОВАН</h4><p style="word-break:break-all;opacity:.8">'+cph(k)+'</p></div>'; return; }
+  if(t.g==='final'){ return finalOk()?finalAsk():status(GM.final); }
+  if(t.g&&!F[t.g]) return status(GM[t.g]);
+  if(t.x) return puzzle(t.x);
+  if(t.r==='rd'){ $('rv').innerHTML='<div class="note"><h4>readme.txt</h4><p>Раздел «ЗАКРЫТЫЕ ЛОГИ». lab: лаборатория, калибровки, шлюзы. bunker: запечатан. personal: мои личные заметки. Файлы-шестерёнки запускаются.</p></div>'; return; }
+  const first=!F[t.r]; F[t.r]=1; if(t.r==='r3'&&first) drawEx(); recOut(t.r); if(t.r==='r3'&&first) status('В tishina появилась папка wife.'); if(t.r==='r12'&&F.both) status('Две записи рядом. В b15 проявился скрытый файл.'); }
+function pz(h){ $('pzb').innerHTML=h+'<p style="margin-top:16px"><button class="btn ghost" id="pzx" style="margin:0">Закрыть</button></p>'; $('pz').classList.add('on'); $('pzx').onclick=()=>$('pz').classList.remove('on'); }
+function solved(k,msg){ F[k]=1; lastProg=Date.now(); if(F.ai&&F.tin) F.both=1; okChime(); msg+=` [${['morse','heat','oct','lie','radio'].filter(x=>F[x]).length}/5]`; toast('ГОЛОВОЛОМКА РЕШЕНА',msg,8000); setTimeout(()=>{ $('pz').classList.remove('on'); drawEx(); out(msg); },900); }
+function puzzle(k){ initAudio();
+  if(k==='morse'||k==='morse2'){ const st2=k==='morse2', phrase=st2?'TWELVE WALKED OUT':'SLEEP', okA=st2?['12','TWELVE','ДВЕНАДЦАТЬ']:['SLEEP','СПЯТ'];
+    const chart=st2?'':'<details style="margin-top:10px;font-size:12px;color:var(--dim)"><summary>Азбука Морзе</summary>'+Object.entries(MZ).map(([c,m])=>c+' '+m).join(' · ')+'</details>';
+    pz(`<h3>${st2?'knock2.aud':'knock.aud'}</h3><p>Стук по металлу. Лёгкий удар — точка, тяжёлый — тире. ${st2?'Запиши номер прототипа, о котором стучат.':'Запиши слово.'}</p><p><button class="btn" id="pl" style="margin:12px 0">▶ Слушать</button></p><input class="pass" id="ans" style="margin:6px 0" placeholder="${st2?'НОМЕР...':'СЛОВО...'}">${chart}`);
+    $('pl').onclick=()=>playKnock(phrase);
+    $('ans').onkeydown=e=>{ if(e.key==='Enter'){ if(okA.includes(e.target.value.trim().toUpperCase())) solved(st2?'k2':'morse',st2?'Файл metod.txt расшифрован.':'Шлюз сектора «Тишина» открыт.'); else buzz(); } }; }
+  if(k==='oct'){ const real=['#01','#02','#14','#05','#09','#07'], all=[...real,'#11','#18','#19']; let i=0;
+    const draw=()=>{ i=0; $('ob').innerHTML=all.slice().sort(()=>Math.random()-.5).map((n,j)=>{ const a=j/9*6.283-1.57, x=200+150*Math.cos(a), y=140+105*Math.sin(a); return `<g class="node" data-n="${n}"><circle cx="${x}" cy="${y}" r="26" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="${x}" y="${y+5}" text-anchor="middle" fill="var(--accent)">${n}</text></g>`; }).join(''); };
+    pz('<h3>Калибратор «Петри»</h3><p>Нажимай только тех, кто умер от нестабильности, от самого короткого срока жизни к самому долгому. Остальных трогать нельзя.</p><svg viewBox="0 0 400 280" id="oc"><g id="ob"></g></svg><div id="om" style="font-size:12px;color:var(--danger)"></div>'); draw();
+    $('oc').onclick=e=>{ const g=e.target.closest('.node'); if(!g) return; if(cool('oct')>0) return $('om').textContent='Охлаждение: '+cool('oct')+' с';
+      if(g.dataset.n===real[i]){ g.firstChild.setAttribute('fill','rgba(255,160,46,.4)'); uiClick(); if(++i===real.length) solved('oct','Замер: воздух 12%, иллюзии 12%. Открыт файл petri.log.'); }
+      else { buzz(); fail('oct'); $('om').textContent='Ошибка. Схема перестроена.'; draw(); } }; }
+  if(k==='heat'){ pz('<h3>crystal.img</h3><p>Ткань #02 застыла кристаллом. Зажми кнопку мыши и води «горелкой» по камню.</p><div style="position:relative;height:200px;margin-top:12px"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--accent);text-shadow:var(--glow);font-size:18px;text-align:center">ПУТЬ: /bunker<br>ЧАСТОТА: 94.3</div><canvas id="cv" width="480" height="200" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas></div>');
+    const cv=$('cv'),x=cv.getContext('2d'); const gr=x.createLinearGradient(0,0,480,200); gr.addColorStop(0,'#2b4a52'); gr.addColorStop(1,'#122229'); x.fillStyle=gr; x.fillRect(0,0,480,200);
+    let n=0,down=0; cv.onpointerdown=()=>down=1; cv.onpointerup=cv.onpointerleave=()=>down=0;
+    cv.onpointermove=e=>{ if(!down) return; const r=cv.getBoundingClientRect(), px=(e.clientX-r.left)*480/r.width, py=(e.clientY-r.top)*200/r.height; x.globalCompositeOperation='destination-out'; const g=x.createRadialGradient(px,py,2,px,py,34); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(px-34,py-34,68,68); hiss(.05,.03,6000); if(++n===150) solved('heat','Проявился путь: /bunker. Частота: 94.3.'); }; }
+  if(k==='lie'){ const L=[['Клон #07 «Эпсилон» прожил 24 дня.',0],['Клон #09 «Иота» прожил 24 дня.',1],['Клон #11 «Каппа» покончил с собой.',0],['У клона #18 «Сигма» осталось менее 12 часов.',0],['Сходство клона #01 «Альфа» с Отто: 99.4%.',0],['Клон #01 «Альфа» прожил 3 часа.',0],['Клон #02 «Бета» прожил сутки.',0],['Клон #14 «Ню» прожил двое суток.',0]].sort(()=>Math.random()-.5);
+    pz('<h3>pollen.doc</h3><p>Одно утверждение расходится с архивом. Сверься со старыми записями и выбери ложь.</p>'+L.map(x=>`<button class="lie" data-f="${x[1]}">${x[0]}</button>`).join('')+'<div id="lm" style="font-size:12px;color:var(--danger)"></div>');
+    $('pzb').onclick=e=>{ const b=e.target.closest('.lie'); if(!b) return; if(cool('lie')>0) return $('lm').textContent='Охлаждение: '+cool('lie')+' с'; if(b.dataset.f==='1') solved('lie','Ложь найдена. В lab открылась папка b15.'); else { buzz(); fail('lie'); b.style.borderColor='var(--danger)'; } }; }
+  if(k==='col'){ const T3=[144,12,19], N=['Оттенок','Насыщенность','Яркость'], M=[360,100,100];
+    pz('<h3>chamber.exe</h3><p>Окраска камеры №19 задаётся тремя числами. Подбери цвет.</p><div id="sw" style="height:90px;border:1px solid var(--line);margin:12px 0"></div>'+N.map((t,i)=>`<label style="display:block;font-size:12px;margin-top:8px">${t}: <b id="cv${i}">0</b><input type="range" min="0" max="${M[i]}" value="0" data-i="${i}" class="cs" style="width:100%;accent-color:var(--accent)"></label>`).join('')+'<p style="margin-top:14px"><button class="btn" id="cok">Зафиксировать окраску</button></p><div id="cm2" style="font-size:12px;color:var(--danger);margin-top:8px"></div>');
+    const v=[0,0,0], up=()=>{ $('sw').style.background=`hsl(${v[0]},${v[1]}%,${v[2]}%)`; v.forEach((x,i)=>$('cv'+i).textContent=x); };
+    document.querySelectorAll('.cs').forEach(r=>r.oninput=()=>{ v[+r.dataset.i]=+r.value; up(); hiss(.03,.02,2000); }); up();
+    $('cok').onclick=()=>{ if(cool('col')>0) return $('cm2').textContent='Охлаждение: '+cool('col')+' с';
+      if(v.every((x,i)=>Math.abs(x-T3[i])<=2)) solved('col','Окраска зафиксирована. Открыт файл chamber.log.'); else { buzz(); fail('col'); $('cm2').textContent='Цвет не совпал с эталоном.'; } }; }
+  if(k==='purge'){ pz('<h3 style="color:#ff2e5b">purge.exe</h3><p>ОЧИСТКА ЯДРА ФАЙЛОВОЙ СИСТЕМЫ.<br>Операция необратима. НАЖИМАТЬ ЗАПРЕЩЕНО.</p><p style="margin:18px 0"><button class="btn" id="pg" style="background:#ff2e5b;color:#fff;padding:18px 22px;font-size:16px">ВЫПОЛНИТЬ ОЧИСТКУ</button></p>'); $('pg').onclick=crash; }
+  if(k==='core'){ pz('<h3>core.exe</h3><p>Ядро Искусственного Восприятия. Выбери личность для запуска.</p><p style="margin:14px 0"><button class="btn" id="cA">Аи</button> <button class="btn ghost" id="cT">Тинъюнь</button></p><div id="cm"></div>');
+    $('cA').onclick=()=>{ if(F.ai){ $('cm').textContent='Аи уже запущена.'; return; } solved('ai','Личность «Аи» запущена. Открыт файл ai.log.'); };
+    $('cT').onclick=()=>{ if(!F.ai) return $('cm').textContent='Исходная личность подавлена. Сначала запусти «Аи» и изучи её.'; if(F.tin) return $('cm').textContent='Уже запущена.';
+      $('cm').innerHTML='Подавление Аи: <b id="sv">100</b>%<input type="range" id="sl" min="0" max="100" value="100" style="width:100%;accent-color:var(--danger)">';
+      $('sl').oninput=e=>{ const v=+e.target.value; $('sv').textContent=v; hiss(.06,.04,800+v*30); if(v===0) solved('tin','Исходная личность прорвалась. Открыт файл tinyun.log.'); }; }; }
+  if(k==='lull'){ const fr=[220,262,294,330,392], mel=[1,3,2,0,4]; let i=0;
+    pz('<h3>lullaby.exe</h3><p>Запись мелодии, которую она напевала. Послушай и повтори.</p><p><button class="btn" id="lp">▶ Слушать</button></p><p style="margin:14px 0">'+fr.map((f,j)=>`<button class="btn ghost" data-j="${j}" style="margin:3px;padding:14px 18px">●</button>`).join('')+'</p>');
+    $('lp').onclick=()=>mel.forEach((m,q)=>setTimeout(()=>{ hum(fr[m],.62,.09); const bt=document.querySelectorAll('[data-j]')[m]; bt.classList.add('hl'); setTimeout(()=>bt.classList.remove('hl'),500); },q*700));
+    $('pzb').onclick=e=>{ const b=e.target.closest('[data-j]'); if(!b) return; const j=+b.dataset.j; hum(fr[j],.45,.08); if(j===mel[i]){ if(++i===mel.length) solved('lull','Мелодия узнана. Открыт файл lullaby.log.'); } else { buzz(); i=0; } }; }
+  if(k==='radio'){ pz('<h3>radio.exe</h3><p>Частота: <b id="fq">88.0</b> МГц</p><input type="range" id="tune" min="880" max="1080" value="880" style="width:100%;accent-color:var(--accent)">'); let said=0;
+    $('tune').oninput=e=>{ const f=e.target.value/10, near=Math.abs(f-94.3); $('fq').textContent=f.toFixed(1); hiss(.12,near<.4?.02:.08,1500+Math.random()*2500);
+      if(near<.15&&!said){ said=1; toast('ПРИЁМНИК 94.3','Шёпот сквозь помехи: «…слушай… камень… они не живы…»',9000); speak('Listen to the stone. They are not alive. They are sealed.'); setTimeout(()=>solved('radio','Приём. В бункере проявилась скрытая папка .chronicle'),3500); } }; }
+}
+
+const SH=[
+ ['r1',['Начни с лаборатории: открой папку lab','Открой файл registry.log','В registry.log сказано, что делать дальше: слушай стук шлюзов.']],
+ ['morse',['В lab есть файл со звёздочкой, который стучит.','Запусти knock.aud и слушай. Короткие и длинные удары: азбука Морзе, латиница.','Слово из пяти букв: «спят» по-английски. Введи SLEEP.']],
+ ['k2',['Внутри «Тишины» шлюзы стучат снова: запусти knock2.aud.','Длинное сообщение латиницей, три слова. Запиши номер прототипа.','TWELVE WALKED OUT. Номер: 12.']],
+ ['heat',['Бункер закрыт, но путь туда оставлен на изображении.','Запусти crystal.img и води мышью с зажатой кнопкой по камню.','Сотри «лёд» на всём камне, пока не проступит надпись.']],
+ ['oct',['petri.exe проверяет, помнишь ли ты сроки жизни клонов.','Сверь старые записи раздела I и нажимай прототипы от самого короткого срока.','Порядок: #01, #02, #14, #05, #09, #07. Остальных (#11, #18, #19) не нажимать.']],
+ ['lie',['pollen.doc проверяет твою память об архиве.','Сверь каждое утверждение со старыми записями раздела I.','Ложь про клона #09: он прожил 7 дней, а не 24.']],
+ ['radio',['В бункере есть радио, а частота лежит на кристалле.','Запусти radio.exe в бункере и тяни ползунок к 94.3.','Остановись на 94.3 и подожди шёпот.']],
+ ['col',['В бункере есть chamber.exe: цвет камеры №19 задаётся тремя числами.','Оттенок, насыщенность, яркость: замкнутый резонанс, предел и номер объекта. Все числа в petri.log.','Оттенок 144, насыщенность 12, яркость 19.']],
+ ['done',['Все ключи собраны. Сравни notes.txt и выписку из хроники: цвета печатей там записаны по-разному.','Верить стоит хронике. Кольца идут в порядке имён из хроники.','Золотая, серая, синяя.']]
+];
+const HC={};
+function stageHint(){ if(F.done) return 'Необязательные ветки: после pollen.doc в lab открывается b15 (Аи и Тинъюнь), после metod.txt в tishina открывается wife (мать Лочи).'; const st=SH.find(x=>!F[x[0]])||SH[SH.length-1]; const i=Math.min(HC[st[0]]=(HC[st[0]]||0)+1,3); return `Подсказка ${i}/3: ${st[1][i-1]}`; }
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged=()=>{};
+
+/* ===== звуки: стук по металлу и напевание ===== */
+let pipeBus;
+function getPipe(){ if(pipeBus) return pipeBus; pipeBus=ac.createGain(); const d=ac.createDelay(), fb=ac.createGain(); d.delayTime.value=.085; fb.gain.value=.38;
+  pipeBus.connect(master); pipeBus.connect(d); d.connect(fb); fb.connect(d); d.connect(master); return pipeBus; }
+function clang(vol,pitch){ if(!ac) return; const t=ac.currentTime, bus=getPipe();
+  [[310,.55],[790,.32],[1430,.18],[2360,.1]].forEach(([f,a],i)=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='sine'; o.frequency.value=f*pitch*(1+Math.random()*.02);
+    g.gain.setValueAtTime(a*.22*vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+.55-i*.09); o.connect(g); g.connect(bus); o.start(t); o.stop(t+.6); });
+  hiss(.025,.14*vol,3200); tone('sine',95*pitch,45,.14,.14*vol); }
+const MZ={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..'};
+let mTimers=[];
+function playKnock(text){ initAudio(); mTimers.forEach(clearTimeout); mTimers=[]; let t=0;
+  text.split(' ').forEach(w=>{ [...w].forEach(ch=>{ [...MZ[ch]].forEach(c=>{ mTimers.push(setTimeout(()=>c==='.'?clang(.55,1.25):clang(1.1,.8),t)); t+=c==='.'?280:340; }); t+=520; }); t+=900; }); }
+function hum(f,dur,vol){ if(!ac) return; const t=ac.currentTime, bus=getPipe(), g=ac.createGain(), lp=ac.createBiquadFilter(), fm=ac.createBiquadFilter(), lfo=ac.createOscillator(), lg=ac.createGain();
+  lp.type='lowpass'; lp.frequency.value=1100; fm.type='peaking'; fm.frequency.value=520; fm.gain.value=9; fm.Q.value=2;
+  lfo.frequency.value=5; lg.gain.value=f*.012; lfo.connect(lg);
+  [-4,4].forEach(dt=>{ const o=ac.createOscillator(); o.type='sawtooth'; o.frequency.value=f; o.detune.value=dt; lg.connect(o.frequency); o.connect(fm); o.start(t); o.stop(t+dur+.2); });
+  fm.connect(lp); lp.connect(g); g.connect(bus); lfo.start(t); lfo.stop(t+dur+.2);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime((vol||.07),t+.12); g.gain.setValueAtTime((vol||.07),t+dur-.1); g.gain.linearRampToValueAtTime(0,t+dur+.15); }
+
+let lastProg=Date.now(); const T0=Date.now(); let HU=0;
+const hintWait=()=>Math.max(0,Math.ceil(420-(Date.now()-lastProg)/1000)), fmt=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+function gatedHint(){ const w=hintWait(); if(w>0) return 'Подсказка станет доступна через '+fmt(w)+'.'; lastProg=Date.now(); HU++; return stageHint(); }
+const FL={}; const cool=k=>Math.max(0,Math.ceil(((FL[k]||{t:0}).t-Date.now())/1000));
+function fail(k){ const f=FL[k]=FL[k]||{n:0,t:0}; f.n++; if(f.n>=2) f.t=Date.now()+Math.min(3000*2**(f.n-2),40000); }
+const scr=k=>[...k].map(c=>/[.\/]/.test(c)?c:'▒░▓#%@'[c.charCodeAt(0)%6]).join('');
+const cph=k=>[...Array(420)].map((_,i)=>'▀▄█▌▐░▒▓'[(k.charCodeAt(i%k.length)*i+i*7)%8]).join('');
+function crash(){ document.title='…не закрывай вкладку'; $('pz').classList.remove('on'); const sc=$('screen'); sc.classList.add('crash'); buzz();
+  [0,300,700,1100,1500].forEach(t=>setTimeout(()=>{ hiss(.4,.15,500+Math.random()*3000); tone('sawtooth',200+Math.random()*600,40,.5,.1); },t));
+  setTimeout(()=>{ $('pzb').innerHTML='<h3 style="color:#ff2e5b">FATAL EXCEPTION 0xC0DE0019</h3><p style="color:#ff7c97">CORE_PURGE: нарушена целостность.<br>Файловая система зашифрована.<br>Аварийный перезапуск...</p>'; $('pz').classList.add('on'); },1800);
+  setTimeout(()=>{ sc.classList.remove('crash'); $('pz').classList.remove('on'); F.crash=1; F.mad=1; path=[T]; pn=['~']; drawEx(); toast('СИСТЕМА','Перезапуск завершён. Все файлы зашифрованы. В корне появился неизвестный файл.',9000); },4600); }
+setInterval(()=>document.querySelectorAll('.glitch').forEach(g=>{ g.textContent=[...g.dataset.t].map(c=>Math.random()<.12&&c!==' '?'▓▒░#@%&█'[Math.floor(Math.random()*8)]:c).join(''); }),90);
+const MORE=[
+ {en:'The corridor has doors. List, then enter. Not every door answers to a key.',ru:'В оболочке есть двери. Открывай папки щелчком. Не каждая дверь открывается ключом.'},
+ {en:'The sleepers knock in the old code. Short and long. Latin letters.',ru:'Шлюзы стучат азбукой Морзе. Короткие и длинные. Латиница.'},
+ {en:'The crystal hides a road. Heat it with patience.',ru:'Кристалл скрывает дорогу. Грей его терпеливо.'},
+ {en:'Five, he says. The chronicle says otherwise. The name he never speaks is the guest.',ru:'«Пять», говорит Отто. Хроника спорит. Имя, которое он не произносит, и есть гость.'}
+];
+HINTS.push(...MORE);
+
+/* ===== Корпус: пазл с задней панелью ===== */
+const mon=document.querySelector('.monitor');
+function flip(){ initAudio(); mon.classList.add('turn'); tone('sine',180,90,.4,.08); setTimeout(()=>{ mon.classList.toggle('rear-on'); mon.classList.remove('turn'); },450); }
+$('flipBtn').onclick=()=>{ $('flipBtn').classList.remove('pulse'); flip(); }; $('rbk').onclick=flip;
+let scrOut=0; document.querySelectorAll('.scr').forEach(b=>b.onclick=()=>{ b.classList.add('out'); for(let i=0;i<5;i++) setTimeout(()=>kc(true,false),i*80);
+  if(++scrOut===4) setTimeout(()=>{ $('cover').classList.add('off'); tone('sine',90,40,.5,.2); },450); });
+const RULES=[["Если включён D, то включён и F.",L=>!L.D||L.F],["Если включён B, то включён и C.",L=>!L.B||L.C],["Из F и E включён ровно один.",L=>L.F!==L.E],["Если G выключен, то выключен и E.",L=>L.G||!L.E],["Всего включено ровно 4 рычага.",L=>L.A+L.B+L.C+L.D+L.E+L.F+L.G+L.H===4],["Если A выключен, то выключен и D.",L=>L.A||!L.D],["Из H, B, D включены не менее двух.",L=>L.H+L.B+L.D>=2],["Из E, H, D включены не менее двух.",L=>L.E+L.H+L.D>=2]];
+const LV={}; 'ABCDEFGH'.split('').forEach(k=>LV[k]=0);
+$('levs').innerHTML='ABCDEFGH'.split('').map(k=>`<button class="lev" data-k="${k}" aria-label="Рычаг ${k}"><i></i><b>${k}</b></button>`).join('');
+$('rules').innerHTML='<b>ПРАВИЛА ПОДАЧИ ПИТАНИЯ</b> (рычаг вверх = включён)<br>'+RULES.slice(0,4).map((r,i)=>`${i+1}. ${r[0]}`).join('<br>')+'<br><i style="color:#6b665c">Правила 5–8 вынесены в приложение.</i>';
+$('rules2').innerHTML='<b>ПРИЛОЖЕНИЕ К ТАБЛИЧКЕ</b><br>'+RULES.slice(4).map((r,i)=>`${i+5}. ${r[0]}`).join('<br>');
+document.querySelectorAll('.lev').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; LV[k]^=1; b.classList.toggle('up',!!LV[k]); tone('square',140,60,.08,.1); kc(true,false); });
+$('pwr').onclick=()=>{ const c=cool('pwr'); if(c>0){ $('plst').textContent='ОСТЫВАНИЕ: '+c+' С'; return; }
+  if(RULES.every(r=>r[1](LV))){ F.power=1; lastProg=Date.now(); okChime(); tone('sawtooth',60,300,1.2,.06); $('plst').textContent='ПИТАНИЕ ПОДАНО'; $('plst').style.color='#2dffb0';
+    toast('СИСТЕМА','Линия питания замкнута. Проводник Отто запущен.',8000); setTimeout(()=>{ flip(); renderSidebar(); if(selected==='shell') openShell(); },1300); }
+  else { buzz(); fail('pwr'); $('plst').textContent='ПЕРЕГРУЗКА: ПРЕДОХРАНИТЕЛЬ СРАБОТАЛ'; $('plst').style.color='var(--danger)'; } };
+HINTS.unshift({en:'The module is dead. The power is cut at the source. Turn the machine around.',ru:'Модуль обесточен: питание отсечено на самом корпусе. Нажми ⟲ внизу рамки, чтобы осмотреть монитор сзади. Открути винты, выполни правила на табличке.'},
+ {en:'Eight levers. Every rule must hold at once. Start with the rule that counts them all.',ru:'Восемь рычагов. На табличке в люке только часть правил, остальные на бумажке с внешней стороны корпуса, рядом с решётками. Все правила выполняются одновременно.'});
+
+renderSidebar(); renderDoc(archiveData.find(d=>d.id==='p1'));
+</script>
+</body>
+</html>
